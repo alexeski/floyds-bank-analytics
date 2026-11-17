@@ -3,7 +3,7 @@ On the Bankalytics AI page (app/ai/page.tsx), replace the placeholder with an em
 Requirements:
 
 - Reuse the existing trusted-auth token endpoint. Initialize the SDK once from a shared, idempotent module that's only loaded in the browser (next/dynamic, ssr: false).
-- Use the Spotter 3 chat (updatedSpotterChatPrompt: true). Do NOT set spotterExperienceVersion: SPOTTER_2026_11 if your instance is older than 26.11, because it redirects to the home page.
+- Use the Spotter 3 chat: set updatedSpotterChatPrompt: true and spotterExperienceVersion: SPOTTER_2026_11.
 - On the server, look up the 'Banking' model by exact name and pass its id as worksheetId, with disableSourceSelection: true. Wrap the server fetch in <Suspense>.
 - Enable the chat history sidebar with spotterSidebarConfig: enablePastConversationsSidebar: true, collapsed by default, title 'Chat history', new-chat button 'New conversation'.
 - Hide Spotter's generic sample questions.

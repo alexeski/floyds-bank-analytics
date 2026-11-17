@@ -7,7 +7,7 @@ These prompts are meant to be run **in order** (1 → 5) against this project us
 | `1-embed-mcp.md` | Wire the Banksy chat to the ThoughtSpot MCP server |
 | `2-create-and-embed-liveboard.md` | Create a liveboard and embed it |
 | `3-modify-liveboard.md` | Modify the liveboard |
-| `4-embed-spotter-fast.md` | Embed Spotter |
+| `4-embed-spotter.md` | Embed Spotter |
 | `5-apply-styles.md` | Apply custom styles |
 | `example.md` | A trivial prompt for testing your setup |
 
@@ -26,7 +26,7 @@ Run these from the project root. Swap in the prompt file you want.
 ### macOS
 
 ```bash
-pbcopy < example-prompts/1-embed-mcp.md
+pbcopy < prompts/1-embed-mcp.md
 ```
 
 ### Linux
@@ -35,13 +35,13 @@ Use whichever clipboard tool you have installed.
 
 ```bash
 # X11
-xclip -selection clipboard < example-prompts/1-embed-mcp.md
+xclip -selection clipboard < prompts/1-embed-mcp.md
 
 # X11 (alternative)
-xsel --clipboard --input < example-prompts/1-embed-mcp.md
+xsel --clipboard --input < prompts/1-embed-mcp.md
 
 # Wayland
-wl-copy < example-prompts/1-embed-mcp.md
+wl-copy < prompts/1-embed-mcp.md
 ```
 
 Install if missing, for example `sudo apt install xclip` or `sudo apt install wl-clipboard`.
@@ -50,15 +50,15 @@ Install if missing, for example `sudo apt install xclip` or `sudo apt install wl
 
 ```powershell
 # PowerShell
-Get-Content -Raw example-prompts\1-embed-mcp.md | Set-Clipboard
+Get-Content -Raw prompts\1-embed-mcp.md | Set-Clipboard
 ```
 
 ```bat
 :: Command Prompt
-clip < example-prompts\1-embed-mcp.md
+clip < prompts\1-embed-mcp.md
 ```
 
-Under WSL, use `clip.exe < example-prompts/1-embed-mcp.md`.
+Under WSL, use `clip.exe < prompts/1-embed-mcp.md`.
 
 You can also open the file in any editor, select all, and copy.
 
@@ -76,7 +76,7 @@ Paste the prompt at the `>` prompt and press Enter. Review each proposed edit an
 Alternatively, skip the clipboard and pass the file directly:
 
 ```bash
-claude "$(cat example-prompts/1-embed-mcp.md)"
+claude "$(cat prompts/1-embed-mcp.md)"
 ```
 
 ### Claude Code in VS Code
