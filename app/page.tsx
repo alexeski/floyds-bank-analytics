@@ -1,237 +1,363 @@
 import Link from "next/link";
-import type { ComponentType, SVGProps } from "react";
-import BanksyBar from "./components/banksy/BanksyBar";
+import { BANK_NAME, Emblem, PRODUCT_NAME } from "./components/brand";
+import BusinessLineIcon from "./components/BusinessLineIcon";
+import Sparkline from "./components/charts/Sparkline";
 import {
   ArrowRightIcon,
-  BriefcaseIcon,
-  CardIcon,
+  BoltIcon,
   ChartIcon,
-  CheckingIcon,
-  HomeLoanIcon,
-  SavingsIcon,
+  LayersIcon,
+  LockIcon,
+  ShieldIcon,
   SparkleIcon,
-  WealthIcon,
+  TrendUpIcon,
+  UserIcon,
 } from "./components/icons";
+import MarketingFooter from "./components/marketing/MarketingFooter";
+import MarketingHeader from "./components/marketing/MarketingHeader";
+import Swoosh from "./components/marketing/Swoosh";
+import {
+  BUSINESS_LINES,
+  HEADLINE_KPIS,
+  REPORTING_PERIOD,
+} from "./components/sampleData";
 
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
-const REPORTING_PERIOD = "Q3 2026";
-
-const HEADLINE_METRICS = [
-  { label: "Total deposits", value: "$412.6B", change: "+3.4% QoQ" },
-  { label: "Active cardholders", value: "18.4M", change: "+1.2% QoQ" },
-  { label: "Net interest margin", value: "3.12%", change: "+6 bps QoQ" },
-  { label: "Digital adoption", value: "78.5%", change: "+2.1 pts QoQ" },
+const PROOF_POINTS = [
+  { value: "26M", label: "customers in a single view" },
+  { value: "£470bn+", label: "of deposits analysed daily" },
+  { value: "6", label: "lines of business, one model" },
+  { value: "< 10s", label: "from question to chart" },
 ] as const;
 
-const LINES_OF_BUSINESS: {
-  name: string;
-  description: string;
-  metric: string;
-  metricLabel: string;
-  icon: IconComponent;
-}[] = [
+const SECURITY_POINTS = [
   {
-    name: "Credit Cards",
-    description: "Spend, revolve rates, rewards redemption, and delinquency.",
-    metric: "$38.9B",
-    metricLabel: "Quarterly purchase volume",
-    icon: CardIcon,
+    icon: LockIcon,
+    title: "Trusted authentication",
+    body: "Short-lived tokens issued server-side. Secrets never reach the browser.",
   },
   {
-    name: "Checking",
-    description: "Account growth, primacy, direct deposit, and fee income.",
-    metric: "11.2M",
-    metricLabel: "Active accounts",
-    icon: CheckingIcon,
+    icon: UserIcon,
+    title: "Row-level security",
+    body: "Every analyst sees only the customers, regions, and products they're entitled to.",
   },
   {
-    name: "Savings & CDs",
-    description: "Balances, rate sensitivity, maturities, and attrition.",
-    metric: "$146.3B",
-    metricLabel: "Savings and CD balances",
-    icon: SavingsIcon,
+    icon: ShieldIcon,
+    title: "Audit-ready",
+    body: "Every question, answer, and Liveboard view is logged for governance and review.",
   },
-  {
-    name: "Mortgages & Lending",
-    description: "Originations, pipeline, auto and personal loan performance.",
-    metric: "$4.7B",
-    metricLabel: "Quarterly originations",
-    icon: HomeLoanIcon,
-  },
-  {
-    name: "Small Business",
-    description: "Business checking, merchant services, and credit lines.",
-    metric: "862K",
-    metricLabel: "Business clients",
-    icon: BriefcaseIcon,
-  },
-  {
-    name: "Wealth Management",
-    description: "Assets under management, advisor book, and net flows.",
-    metric: "$94.1B",
-    metricLabel: "Assets under management",
-    icon: WealthIcon,
-  },
-];
+] as const;
 
-export default function Home() {
+const ANSWER_BARS = [
+  { label: "London", value: 4.8 },
+  { label: "South East", value: 3.9 },
+  { label: "Scotland", value: 3.1 },
+  { label: "North West", value: 2.6 },
+] as const;
+
+export default function LandingPage() {
   return (
-    <>
-      <BanksyBar />
-      <section className="relative overflow-hidden bg-gradient-to-br from-navy-950 via-navy-900 to-navy-700 text-white">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-40 -top-40 size-[520px] rounded-full bg-brand-500/20 blur-3xl"
-        />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:py-20">
+    <div className="flex flex-1 flex-col bg-white">
+      <MarketingHeader />
+
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-brand-900 text-white">
+        <Swoosh />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pt-16 pb-20 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:pt-24 lg:pb-28">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">
-              Enterprise Analytics
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 py-1 pr-3 pl-1 text-xs font-semibold text-brand-100 ring-1 ring-white/15">
+              <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[11px] font-bold text-brand-950">
+                New
+              </span>
+              Meet Banksy, your AI data analyst
             </p>
-            <h1 className="mt-3 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              Insight across every account, card, and customer.
+            <h1 className="mt-6 text-[44px] leading-[1.04] font-extrabold tracking-tight sm:text-6xl">
+              Every number behind the bank.{" "}
+              <span className="text-brand-400">In one place.</span>
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-brand-100/90">
-              One place to understand performance across consumer and business
-              banking — from card spend to deposit growth to lending pipelines.
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-brand-100/90">
+              {PRODUCT_NAME} brings current accounts, savings, cards, lending,
+              small business, and wealth into one live view, so every team at{" "}
+              {BANK_NAME} can see what&rsquo;s changing and why.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <Link
-                href="/analytics"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-500 px-5 py-3 text-sm font-semibold shadow-lg shadow-brand-500/30 transition-colors hover:bg-brand-600"
+                href="/login"
+                className="inline-flex items-center gap-2 rounded-md bg-brand-500 px-6 py-3.5 text-[15px] font-bold text-brand-950 shadow-lg shadow-black/20 transition-colors hover:bg-brand-400"
               >
-                Explore Analytics
-                <ArrowRightIcon className="size-4" />
+                <LockIcon className="size-4" />
+                Log on to {PRODUCT_NAME}
               </Link>
               <Link
-                href="/ai"
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold ring-1 ring-white/25 transition-colors hover:bg-white/15"
+                href="#platform"
+                className="inline-flex items-center gap-2 rounded-md px-6 py-3.5 text-[15px] font-bold text-white ring-1 ring-white/40 transition-colors hover:bg-white/10"
               >
-                <SparkleIcon className="size-4" />
-                Ask Bankalytics AI
+                See what&rsquo;s inside
+                <ArrowRightIcon className="size-4" />
               </Link>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white/[0.07] p-6 ring-1 ring-white/15 backdrop-blur">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold">Bank at a glance</h2>
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-brand-200">
-                {REPORTING_PERIOD}
-              </span>
+          <HeroPreview />
+        </div>
+      </section>
+
+      {/* Proof points */}
+      <section className="border-b border-line">
+        <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-y-8 px-4 py-10 sm:px-6 lg:grid-cols-4">
+          {PROOF_POINTS.map(({ value, label }) => (
+            <div key={label} className="border-l-4 border-brand-500 pl-4">
+              <dt className="sr-only">{label}</dt>
+              <dd className="text-3xl font-extrabold tracking-tight text-brand-900 sm:text-4xl">
+                {value}
+              </dd>
+              <dd className="mt-1 text-sm text-muted">{label}</dd>
             </div>
-            <dl className="mt-5 grid grid-cols-2 gap-3">
-              {HEADLINE_METRICS.map(({ label, value, change }) => (
-                <div key={label} className="rounded-xl bg-navy-950/40 p-4">
-                  <dt className="text-xs text-brand-200">{label}</dt>
-                  <dd className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
-                    {value}
-                  </dd>
-                  <dd className="mt-1 text-xs font-medium text-emerald-300">
-                    {change}
-                  </dd>
-                </div>
+          ))}
+        </dl>
+      </section>
+
+      {/* Lines of business */}
+      <section id="platform" className="scroll-mt-28 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+          <div className="max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-700">
+              The platform
+            </p>
+            <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-ink">
+              One view across the whole bank
+            </h2>
+            <p className="mt-4 text-lg text-muted">
+              Built on a governed banking model, so every team works from the
+              same definitions, from the branch network to the board.
+            </p>
+          </div>
+          <ul className="mt-12 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+            {BUSINESS_LINES.map((line) => (
+              <li key={line.key} className="bg-white p-7">
+                <span className="inline-flex rounded-lg bg-brand-50 p-2.5 text-brand-700 ring-1 ring-brand-100">
+                  <BusinessLineIcon line={line.key} className="size-6" />
+                </span>
+                <h3 className="mt-5 text-lg font-bold text-ink">{line.name}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                  {line.description}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Banksy */}
+      <section id="banksy" className="scroll-mt-28 bg-surface">
+        <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-700">
+              Banksy AI
+            </p>
+            <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-ink">
+              Ask in plain English. Get the answer, not a ticket.
+            </h2>
+            <p className="mt-4 text-lg text-muted">
+              Banksy understands the bank&rsquo;s data model, so relationship
+              managers, product owners, and analysts can explore without
+              writing SQL or waiting on a report.
+            </p>
+            <ul className="mt-8 space-y-4">
+              {[
+                {
+                  icon: SparkleIcon,
+                  text: "Answers with charts, built from governed data",
+                },
+                {
+                  icon: BoltIcon,
+                  text: "Follow-up questions keep the context of the conversation",
+                },
+                {
+                  icon: LayersIcon,
+                  text: "Pin any answer to a Liveboard and share it with your team",
+                },
+              ].map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-start gap-3">
+                  <span className="rounded-md bg-brand-700 p-1.5 text-white">
+                    <Icon className="size-4" />
+                  </span>
+                  <span className="pt-0.5 font-medium text-ink">{text}</span>
+                </li>
               ))}
-            </dl>
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-xl shadow-brand-900/5">
+            <div className="flex items-center gap-2 border-b border-line pb-4">
+              <span className="rounded-md bg-brand-700 p-1.5 text-white">
+                <SparkleIcon className="size-4" />
+              </span>
+              <span className="font-bold text-ink">Banksy</span>
+              <span className="ml-auto text-xs text-muted">Banking model</span>
+            </div>
+            <div className="space-y-4 pt-5">
+              <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-brand-700 px-4 py-2.5 text-sm text-white">
+                Which regions grew current account balances fastest in{" "}
+                {REPORTING_PERIOD}?
+              </p>
+              <div className="max-w-[92%] rounded-2xl rounded-bl-sm border border-line bg-surface p-4">
+                <p className="text-sm text-ink">
+                  <strong>London</strong> led with <strong>+4.8%</strong>{" "}
+                  quarter on quarter, followed by the South East. Growth was
+                  driven by salary switching into Premier accounts.
+                </p>
+                <div className="mt-4 rounded-lg bg-white p-4 ring-1 ring-line">
+                  <p className="text-xs font-semibold text-muted">
+                    Balance growth, QoQ %
+                  </p>
+                  <ul className="mt-3 space-y-2.5">
+                    {ANSWER_BARS.map(({ label, value }) => (
+                      <li key={label} className="grid grid-cols-[88px_1fr_36px] items-center gap-3 text-xs">
+                        <span className="font-medium text-ink">{label}</span>
+                        <span className="h-2.5 rounded-full bg-surface">
+                          <span
+                            className="block h-full rounded-full bg-brand-700"
+                            style={{ width: `${(value / 5) * 100}%` }}
+                          />
+                        </span>
+                        <span className="text-right font-bold tabular-nums text-ink">
+                          {value}%
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      {/* Security */}
+      <section id="security" className="scroll-mt-28 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.6fr]">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-700">
+                Security
+              </p>
+              <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-ink">
+                Bank-grade by design
+              </h2>
+              <p className="mt-4 text-lg text-muted">
+                Customer data stays protected at every step, with the same
+                controls our regulators expect everywhere else.
+              </p>
+            </div>
+            <ul className="grid gap-5 sm:grid-cols-3">
+              {SECURITY_POINTS.map(({ icon: Icon, title, body }) => (
+                <li key={title} className="rounded-xl border border-line p-6">
+                  <Icon className="size-7 text-brand-700" />
+                  <h3 className="mt-4 font-bold text-ink">{title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted">{body}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to action */}
+      <section className="relative overflow-hidden bg-brand-700 text-white">
+        <Swoosh className="opacity-60" />
+        <div className="relative mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Lines of business
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Ready to see the whole picture?
             </h2>
-            <p className="mt-1 text-muted">
-              Performance snapshots for each product family.
+            <p className="mt-2 text-brand-100">
+              Log on with your {BANK_NAME} colleague ID.
             </p>
           </div>
           <Link
-            href="/analytics"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:text-navy-800"
+            href="/login"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3.5 text-[15px] font-bold text-brand-900 shadow-lg shadow-black/15 transition-colors hover:bg-brand-50"
           >
-            View all dashboards
-            <ArrowRightIcon className="size-4" />
+            <LockIcon className="size-4" />
+            Log on
           </Link>
         </div>
-
-        <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {LINES_OF_BUSINESS.map(
-            ({ name, description, metric, metricLabel, icon: Icon }) => (
-              <li
-                key={name}
-                className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="rounded-xl bg-brand-50 p-2.5 text-brand-600 ring-1 ring-brand-100">
-                    <Icon className="size-6" />
-                  </span>
-                  <h3 className="font-semibold">{name}</h3>
-                </div>
-                <p className="mt-3 flex-1 text-sm text-muted">{description}</p>
-                <div className="mt-5 border-t border-slate-100 pt-4">
-                  <p className="text-2xl font-semibold tabular-nums tracking-tight text-navy-900">
-                    {metric}
-                  </p>
-                  <p className="text-xs text-muted">{metricLabel}</p>
-                </div>
-              </li>
-            ),
-          )}
-        </ul>
       </section>
 
-      <section className="bg-white">
-        <div className="mx-auto grid max-w-7xl gap-5 px-4 py-14 sm:px-6 md:grid-cols-2">
-          <FeaturePanel
-            href="/analytics"
-            icon={ChartIcon}
-            title="Analytics"
-            description="Curated dashboards for portfolio health, card spend, deposit trends, and customer segments — with drill-down to the account level."
-            cta="Open Analytics"
-          />
-          <FeaturePanel
-            href="/ai"
-            icon={SparkleIcon}
-            title="Bankalytics AI"
-            description="Ask questions in plain English — “Which regions grew checking balances fastest this quarter?” — and get answers with charts in seconds."
-            cta="Start a conversation"
-          />
-        </div>
-      </section>
-    </>
+      <MarketingFooter />
+    </div>
   );
 }
 
-function FeaturePanel({
-  href,
-  icon: Icon,
-  title,
-  description,
-  cta,
-}: {
-  href: string;
-  icon: IconComponent;
-  title: string;
-  description: string;
-  cta: string;
-}) {
+/** A stylised product screenshot for the hero. */
+function HeroPreview() {
   return (
-    <Link
-      href={href}
-      className="group flex flex-col rounded-2xl bg-gradient-to-br from-brand-50 to-white p-8 ring-1 ring-brand-100 transition-shadow hover:shadow-lg hover:shadow-brand-500/10"
-    >
-      <span className="w-fit rounded-xl bg-navy-900 p-3 text-white">
-        <Icon className="size-6" />
-      </span>
-      <h3 className="mt-5 text-xl font-semibold tracking-tight">{title}</h3>
-      <p className="mt-2 flex-1 text-muted">{description}</p>
-      <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600">
-        {cta}
-        <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
-      </span>
-    </Link>
+    <div className="relative">
+      <div className="overflow-hidden rounded-xl bg-white text-ink shadow-2xl shadow-black/40 ring-1 ring-white/20">
+        <div className="flex items-center gap-2 border-b border-line bg-surface px-4 py-2.5">
+          <span className="size-2.5 rounded-full bg-line" />
+          <span className="size-2.5 rounded-full bg-line" />
+          <span className="size-2.5 rounded-full bg-line" />
+          <span className="ml-3 flex items-center gap-2 text-xs font-semibold text-muted">
+            <Emblem className="size-4" />
+            {PRODUCT_NAME} · Business overview
+          </span>
+        </div>
+        <div className="p-5">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold">Group performance</p>
+            <span className="rounded-md bg-surface px-2 py-0.5 text-xs font-semibold text-muted ring-1 ring-line">
+              {REPORTING_PERIOD}
+            </span>
+          </div>
+          <ul className="mt-4 grid grid-cols-2 gap-3">
+            {HEADLINE_KPIS.map((kpi) => (
+              <li key={kpi.label} className="rounded-lg border border-line p-3">
+                <p className="text-[11px] font-semibold text-muted">{kpi.label}</p>
+                <p className="mt-1 text-xl font-extrabold tracking-tight tabular-nums">
+                  {kpi.value}
+                </p>
+                <div className="mt-1 flex items-end justify-between">
+                  <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-gain">
+                    <TrendUpIcon className="size-3" />
+                    {kpi.change.replace(" QoQ", "")}
+                  </span>
+                  <Sparkline values={kpi.trend} label="" className="h-7 w-20" />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 flex items-end gap-1.5 rounded-lg border border-line px-3 pt-3">
+            {[38, 52, 47, 63, 58, 72, 69, 84, 78, 92, 88, 100].map((height, index) => (
+              <span
+                key={index}
+                className={`flex-1 rounded-t-sm ${index > 8 ? "bg-brand-700" : "bg-brand-200"}`}
+                style={{ height: `${height * 0.7}px` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute -bottom-8 -left-6 hidden w-72 rounded-xl bg-white p-4 text-ink shadow-2xl shadow-black/30 ring-1 ring-line sm:block">
+        <div className="flex items-center gap-2">
+          <span className="rounded-md bg-brand-700 p-1 text-white">
+            <SparkleIcon className="size-3.5" />
+          </span>
+          <span className="text-xs font-bold">Banksy</span>
+        </div>
+        <p className="mt-2 text-sm leading-snug">
+          Card spend on travel is up <strong className="text-gain">12%</strong>{" "}
+          this quarter, led by Premier customers.
+        </p>
+      </div>
+
+      <div className="absolute -top-5 -right-3 hidden items-center gap-2 rounded-full bg-white py-1.5 pr-3 pl-1.5 text-xs font-bold text-ink shadow-xl shadow-black/25 sm:flex">
+        <span className="rounded-full bg-brand-500 p-1 text-brand-950">
+          <ChartIcon className="size-3.5" />
+        </span>
+        Live data
+      </div>
+    </div>
   );
 }

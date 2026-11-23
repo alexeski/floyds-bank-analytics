@@ -1,27 +1,41 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-figtree);
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * Floyds Bank palette — a fictitious brand. Greens run from the deep
+ * "heritage" green used for headers to the bright accent green used for
+ * highlights and positive changes.
+ */
 @theme {
-  --color-navy-950: #061235;
-  --color-navy-900: #0a1f5c;
-  --color-navy-800: #0e2a78;
-  --color-navy-700: #163a99;
-  --color-brand-600: #0a5cc7;
-  --color-brand-500: #1a73e8;
-  --color-brand-200: #bcd6fa;
-  --color-brand-100: #e3eefc;
-  --color-brand-50: #f2f7fe;
-  --color-surface: #f4f7fb;
-  --color-ink: #0f1b33;
-  --color-muted: #5b6b85;
-  --color-gain: #0f8a5f;
+  --color-brand-950: #00241a;
+  --color-brand-900: #024731;
+  --color-brand-800: #035c40;
+  --color-brand-700: #006a4d;
+  --color-brand-600: #00825f;
+  --color-brand-500: #11b67a;
+  --color-brand-400: #3fcb93;
+  --color-brand-300: #8eddb9;
+  --color-brand-200: #c2ebd7;
+  --color-brand-100: #e3f5ec;
+  --color-brand-50: #f2faf6;
+  --color-surface: #f3f4f2;
+  --color-line: #dde1de;
+  --color-ink: #161a18;
+  --color-muted: #59635e;
+  --color-gain: #00825f;
+  --color-loss: #c0392b;
 }
 
 body {
   background: var(--color-surface);
   color: var(--color-ink);
+}
+
+::selection {
+  background: var(--color-brand-200);
+  color: var(--color-brand-950);
 }

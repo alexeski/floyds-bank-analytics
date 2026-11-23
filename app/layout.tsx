@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
+import { Figtree, Geist_Mono } from "next/font/google";
 import BanksyProvider from "./components/banksy/BanksyProvider";
+import { BANK_NAME, PRODUCT_NAME } from "./components/brand";
+import SiteFooter from "./components/SiteFooter";
 import SiteHeader from "./components/SiteHeader";
 import ThoughtSpotInit from "./components/thoughtspot/ThoughtSpotInit";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const figtree = Figtree({
+  variable: "--font-figtree",
   subsets: ["latin"],
 });
 
@@ -17,35 +20,32 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Bankalytics",
-    template: "%s · Bankalytics",
+    default: `${PRODUCT_NAME} · ${BANK_NAME}`,
+    template: `%s · ${BANK_NAME}`,
   },
-  description:
-    "Analytics across credit cards, checking, savings, and lending for the bank.",
-  icons: {
-    icon: "/ts.png",
-  },
+  description: `${BANK_NAME} ${PRODUCT_NAME}: analytics across current accounts, savings, cards, lending, small business, and wealth.`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="en-GB"
+      className={`${figtree.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
         {process.env.TS_USERNAME && (
           <ThoughtSpotInit username={process.env.TS_USERNAME} />
         )}
         <BanksyProvider>
-          <SiteHeader />
+          {/* The header and footer read the pathname, so they sit in Suspense
+              for routes whose path is only known at request time. */}
+          <Suspense fallback={<div className="h-[136px] bg-white md:h-[100px]" />}>
+            <SiteHeader />
+          </Suspense>
           <main className="flex flex-1 flex-col">{children}</main>
-          <footer className="border-t border-slate-200 bg-white">
-            <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-6 text-sm text-muted sm:flex-row sm:justify-between sm:px-6">
-              <span>Bankalytics · Enterprise Analytics Portal</span>
-              <span>Figures shown are sample data for demonstration.</span>
-            </div>
-          </footer>
+          <Suspense fallback={null}>
+            <SiteFooter />
+          </Suspense>
         </BanksyProvider>
       </body>
     </html>

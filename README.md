@@ -1,6 +1,18 @@
 # Bankalytics — ThoughtSpot Banking Analytics Hands-On Lab
 
-Bankalytics is a sample banking analytics portal for ThoughtSpot hands-on labs. It covers credit cards, checking, savings, and lending, and it's built with Next.js, React, and the ThoughtSpot Visual Embed SDK.
+Bankalytics is a sample banking analytics portal for ThoughtSpot hands-on labs. It covers current accounts, savings, credit cards, lending, small business, and wealth, and it's built with Next.js, React, and the ThoughtSpot Visual Embed SDK.
+
+The app is branded for **Floyds Bank**, a fictitious UK bank created for the lab. It isn't affiliated with any real bank. The bank and product names live in `app/components/brand.tsx`, and the colour palette is in `app/globals.css`.
+
+## Pages
+
+| Route | Page |
+| --- | --- |
+| `/` | Public marketing landing page |
+| `/login` | Demo log-on page. No credentials are checked; **Log on** opens the portal. |
+| `/home` | Business overview: headline KPIs, deposit trend, lines of business, and signals (sample data) |
+| `/analytics` | Liveboard catalogue (embedded Liveboards are added during the lab) |
+| `/ai` | Bankalytics AI (Spotter is embedded during the lab) |
 
 ## Prerequisites
 

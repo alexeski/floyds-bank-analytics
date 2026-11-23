@@ -24,7 +24,7 @@ flowchart LR
     user(["Lab attendee<br/>(browser)"])
 
     subgraph app["Bankalytics app (Next.js)"]
-        ui["UI pages<br/>Analytics, Bankalytics AI, Banksy chat"]
+        ui["UI pages<br/>Landing, Log on, Overview,<br/>Analytics, Bankalytics AI, Banksy chat"]
         tokenRoute["/api/thoughtspot/token"]
         banksyRoute["/api/banksy<br/>agent loop"]
     end
