@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CloseIcon, SendIcon, SparkleIcon } from "../icons";
-import { useScout } from "./ScoutProvider";
+import { useScout, type ScoutStatus } from "./ScoutProvider";
+import Markdown from "./Markdown";
 
 const STARTERS = [
   "How did customer deposits change this quarter?",
@@ -10,9 +11,13 @@ const STARTERS = [
   "Show small business clients by region",
 ] as const;
 
+/** Elements marked with this attribute open or toggle the chat themselves. */
+const TRIGGER_SELECTOR = "[data-scout-trigger]";
+
 export default function ScoutChat() {
-  const { isOpen, isThinking, messages, closeChat, ask } = useScout();
+  const { isOpen, isThinking, status, messages, closeChat, ask } = useScout();
   const [draft, setDraft] = useState("");
+  const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -23,13 +28,23 @@ export default function ScoutChat() {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") closeChat();
     }
+    function onPointerDown(event: PointerEvent) {
+      const target = event.target as Element | null;
+      if (!target || dialogRef.current?.contains(target)) return;
+      if (target.closest(TRIGGER_SELECTOR)) return;
+      closeChat();
+    }
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [isOpen, closeChat]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
-  }, [messages, isThinking]);
+  }, [messages, status]);
 
   if (!isOpen) return null;
 
@@ -42,10 +57,11 @@ export default function ScoutChat() {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="false"
       aria-labelledby="scout-chat-title"
-      className="fixed inset-x-4 bottom-4 z-40 flex max-h-[min(660px,calc(100vh-7rem))] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xl shadow-brand-950/25 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[420px]"
+      className="fixed inset-x-4 bottom-4 z-40 flex max-h-[min(680px,calc(100vh-7rem))] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xl shadow-brand-950/25 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[440px]"
     >
       <div className="relative flex items-center gap-3 overflow-hidden bg-brand-900 px-4 py-3.5 text-white">
         <span
@@ -99,35 +115,32 @@ export default function ScoutChat() {
             </ul>
           </div>
         )}
-        {messages.map(({ id, role, content }) => (
-          <div
-            key={id}
-            className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <p
-              className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm whitespace-pre-wrap ${
-                role === "user"
-                  ? "rounded-br-sm bg-brand-700 text-white"
-                  : "rounded-bl-sm border border-line bg-white text-ink"
-              }`}
+        {messages.map(({ id, role, content, error }) => {
+          if (role === "assistant" && !content) return null;
+          return (
+            <div
+              key={id}
+              className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {content}
-            </p>
-          </div>
-        ))}
-        {isThinking && (
-          <p
-            className="flex items-center gap-2 text-xs text-muted"
-            aria-live="polite"
-          >
-            <span className="flex gap-1">
-              <span className="size-1.5 animate-pulse rounded-full bg-brand-600" />
-              <span className="size-1.5 animate-pulse rounded-full bg-brand-600 [animation-delay:150ms]" />
-              <span className="size-1.5 animate-pulse rounded-full bg-brand-600 [animation-delay:300ms]" />
-            </span>
-            Scout is thinking…
-          </p>
-        )}
+              {role === "user" ? (
+                <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand-700 px-3.5 py-2 text-sm whitespace-pre-wrap text-white">
+                  {content}
+                </p>
+              ) : (
+                <div
+                  className={`max-w-[92%] min-w-0 rounded-2xl rounded-bl-sm border px-3.5 py-2.5 text-sm ${
+                    error
+                      ? "border-red-200 bg-red-50 text-red-900"
+                      : "border-line bg-white text-ink"
+                  }`}
+                >
+                  <Markdown>{content}</Markdown>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {status && <StatusLine status={status} />}
         <div ref={endRef} />
       </div>
 
@@ -158,5 +171,33 @@ export default function ScoutChat() {
         </button>
       </form>
     </div>
+  );
+}
+
+/** What Scout is doing now, with the time since the question was sent. */
+function StatusLine({ status }: { status: ScoutStatus }) {
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(performance.now()), 250);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const seconds = now === null ? 0 : Math.max(0, (now - status.startedAt) / 1000);
+
+  return (
+    <p
+      className="flex items-center gap-2 text-xs text-muted"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="flex gap-1" aria-hidden="true">
+        <span className="size-1.5 animate-pulse rounded-full bg-brand-600" />
+        <span className="size-1.5 animate-pulse rounded-full bg-brand-600 [animation-delay:150ms]" />
+        <span className="size-1.5 animate-pulse rounded-full bg-brand-600 [animation-delay:300ms]" />
+      </span>
+      <span className="min-w-0 truncate">{status.label}…</span>
+      <span className="ml-auto shrink-0 tabular-nums">{seconds.toFixed(0)}s</span>
+    </p>
   );
 }

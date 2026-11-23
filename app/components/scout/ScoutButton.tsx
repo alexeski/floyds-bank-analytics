@@ -9,6 +9,7 @@ export default function ScoutButton() {
   return (
     <button
       type="button"
+      data-scout-trigger
       onClick={isOpen ? closeChat : openChat}
       aria-label={isOpen ? "Close Scout chat" : "Open Scout chat"}
       aria-expanded={isOpen}

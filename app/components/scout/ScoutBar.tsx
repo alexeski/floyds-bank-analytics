@@ -25,7 +25,7 @@ export default function ScoutBar() {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-6 sm:px-6">
+    <section data-scout-trigger className="mx-auto max-w-7xl px-4 pb-6 sm:px-6">
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-3 sm:flex-row sm:items-center"

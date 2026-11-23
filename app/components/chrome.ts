@@ -9,10 +9,10 @@ export function isMarketingPath(pathname: string) {
 }
 
 /**
- * Pages whose content fills the viewport below the header, such as the AI
- * assistant. The footer is hidden there so the page never scrolls; add any
- * other full-screen route (an embedded Liveboard, for example) here.
+ * Pages whose content fills the viewport below the header (an embedded
+ * Liveboard or the AI assistant). The footer is hidden there so the page
+ * never scrolls.
  */
 export function isFullScreenPath(pathname: string) {
-  return /^\/ai\/?$/.test(pathname);
+  return /^\/analytics\/[^/]+\/?$/.test(pathname) || /^\/ai\/?$/.test(pathname);
 }

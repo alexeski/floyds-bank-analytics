@@ -1,44 +1,29 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
+import { listLiveboards, type LiveboardSummary } from "@/lib/thoughtspot/liveboards";
 import PageHeader from "../components/PageHeader";
-import { ChartIcon, ClockIcon, GridIcon, LayersIcon } from "../components/icons";
+import {
+  AlertIcon,
+  ArrowUpRightIcon,
+  ChartIcon,
+  ClockIcon,
+  GridIcon,
+  LayersIcon,
+} from "../components/icons";
 
 export const metadata: Metadata = {
   title: "Analytics",
 };
 
-type Preview = "bars" | "line" | "donut" | "table";
-
-const DASHBOARDS: readonly {
-  title: string;
-  description: string;
-  area: string;
-  preview: Preview;
-}[] = [
-  {
-    title: "Portfolio Overview",
-    description: "Balances, income, and growth across every line of business.",
-    area: "Group",
-    preview: "bars",
-  },
-  {
-    title: "Credit Card Performance",
-    description: "Spend by category, revolve rates, rewards, and arrears.",
-    area: "Cards",
-    preview: "line",
-  },
-  {
-    title: "Deposit Trends",
-    description: "Current account and savings inflows, outflows, and rate sensitivity.",
-    area: "Deposits",
-    preview: "donut",
-  },
-  {
-    title: "Customer Segments",
-    description: "Household profitability, product holding, and churn risk.",
-    area: "Customers",
-    preview: "table",
-  },
-];
+const UPDATED_FORMAT = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/London",
+});
 
 export default function AnalyticsPage() {
   return (
@@ -46,109 +31,137 @@ export default function AnalyticsPage() {
       <PageHeader
         eyebrow="Dashboards"
         title="Analytics"
-        description="Explore curated Liveboards across current accounts, savings, cards, lending, and customers."
+        description="Explore Liveboards across current accounts, savings, cards, lending, and customers."
         icon={<ChartIcon className="size-7" />}
       />
       <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-            <GridIcon className="size-4 text-brand-700" />
-            {DASHBOARDS.length} dashboards
-          </p>
-          <p className="flex items-center gap-1.5 text-sm text-muted">
-            <LayersIcon className="size-4" />
-            Interactive Liveboards
-          </p>
-        </div>
-
-        <ul className="mt-4 grid gap-5 sm:grid-cols-2">
-          {DASHBOARDS.map(({ title, description, area, preview }) => (
-            <li
-              key={title}
-              className="flex flex-col overflow-hidden rounded-xl border border-line bg-white"
-            >
-              <div
-                aria-hidden="true"
-                className="flex h-40 items-end bg-gradient-to-br from-brand-50 to-surface px-6 pt-6"
-              >
-                <DashboardPreview kind={preview} />
-              </div>
-              <div className="flex flex-1 flex-col border-t border-line p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-700">
-                      {area}
-                    </p>
-                    <h2 className="mt-1 text-lg font-bold tracking-tight">{title}</h2>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-surface px-2 py-1 text-xs font-semibold text-muted ring-1 ring-line">
-                    <ClockIcon className="size-3.5" />
-                    Coming soon
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted">{description}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <Suspense fallback={<LiveboardGridSkeleton />}>
+          <LiveboardGrid />
+        </Suspense>
       </section>
     </>
   );
 }
 
-/** A decorative thumbnail suggesting the kind of dashboard. */
-function DashboardPreview({ kind }: { kind: Preview }) {
-  const card = "rounded-t-lg border border-b-0 border-line bg-white shadow-sm";
-  if (kind === "bars") {
-    return (
-      <div className={`${card} flex h-full w-full items-end gap-2 px-5 pt-5`}>
-        {[46, 62, 54, 78, 70, 88, 96].map((height, index) => (
-          <span
-            key={index}
-            className={`flex-1 rounded-t ${index === 6 ? "bg-brand-700" : "bg-brand-300"}`}
-            style={{ height: `${height}%` }}
-          />
-        ))}
-      </div>
+async function LiveboardGrid() {
+  let liveboards: LiveboardSummary[];
+  try {
+    liveboards = await listLiveboards();
+  } catch (error) {
+    console.error(
+      "[analytics] listing Liveboards failed:",
+      error instanceof Error ? error.message : "unknown error",
     );
-  }
-  if (kind === "line") {
     return (
-      <div className={`${card} h-full w-full px-4 pt-4`}>
-        <svg viewBox="0 0 200 80" preserveAspectRatio="none" className="h-full w-full">
-          <path d="M0 70 L30 58 L60 62 L90 40 L120 44 L150 24 L200 12 L200 80 L0 80Z" className="fill-brand-500/15" />
-          <path d="M0 70 L30 58 L60 62 L90 40 L120 44 L150 24 L200 12" fill="none" className="stroke-brand-700" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
-        </svg>
-      </div>
-    );
-  }
-  if (kind === "donut") {
-    return (
-      <div className={`${card} flex h-full w-full items-center gap-6 px-6 pt-4`}>
-        <svg viewBox="0 0 42 42" className="size-24 -rotate-90">
-          <circle cx="21" cy="21" r="15.9" fill="none" className="stroke-brand-100" strokeWidth="6" />
-          <circle cx="21" cy="21" r="15.9" fill="none" className="stroke-brand-700" strokeWidth="6" strokeDasharray="42 58" />
-          <circle cx="21" cy="21" r="15.9" fill="none" className="stroke-brand-400" strokeWidth="6" strokeDasharray="30 70" strokeDashoffset="-43" />
-        </svg>
-        <div className="flex-1 space-y-2.5">
-          {[90, 64, 40].map((width, index) => (
-            <span key={index} className="block h-2 rounded-full bg-brand-100" style={{ width: `${width}%` }} />
-          ))}
+      <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-900">
+        <AlertIcon className="mt-0.5 size-5 shrink-0" />
+        <div>
+          <p className="font-bold">We couldn&rsquo;t load your Liveboards.</p>
+          <p className="mt-1">
+            Check the analytics settings in .env.local and that the token
+            service is reachable, then refresh the page.
+          </p>
         </div>
       </div>
     );
   }
+
   return (
-    <div className={`${card} h-full w-full space-y-3 px-5 pt-5`}>
-      {[0, 1, 2, 3].map((row) => (
-        <div key={row} className="flex items-center gap-3">
-          <span className="h-2 w-1/3 rounded-full bg-brand-100" />
-          <span className="h-2 flex-1 rounded-full bg-surface" />
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <GridIcon className="size-4 text-brand-700" />
+          {liveboards.length} {liveboards.length === 1 ? "Liveboard" : "Liveboards"}
+        </p>
+        <p className="flex items-center gap-1.5 text-sm text-muted">
+          <LayersIcon className="size-4" />
+          Most recently updated first
+        </p>
+      </div>
+
+      {liveboards.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-line bg-white p-8 text-center text-muted">
+          No Liveboards are shared with you yet.
+        </p>
+      ) : (
+        <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {liveboards.map((liveboard) => (
+            <li key={liveboard.id}>
+              <LiveboardTile liveboard={liveboard} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+function LiveboardTile({ liveboard }: { liveboard: LiveboardSummary }) {
+  const initials = liveboard.author
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <Link
+      href={`/analytics/${liveboard.id}`}
+      className="group flex h-full flex-col rounded-xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(2,71,49,0.04)] transition-all duration-150 hover:-translate-y-0.5 hover:border-brand-300 hover:shadow-lg hover:shadow-brand-900/5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-500 active:translate-y-0 active:scale-[0.99] active:shadow-sm"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span className="rounded-lg bg-brand-50 p-2 text-brand-700 ring-1 ring-brand-100 transition-colors group-hover:bg-brand-700 group-hover:text-white group-hover:ring-brand-700">
+          <ChartIcon className="size-5" />
+        </span>
+        <ArrowUpRightIcon className="size-4 text-muted transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand-700" />
+      </div>
+      <h2 className="mt-4 text-lg leading-snug font-bold tracking-tight text-ink group-hover:text-brand-900">
+        {liveboard.name}
+      </h2>
+      <p
+        className={`mt-1.5 line-clamp-2 flex-1 text-sm ${
+          liveboard.description ? "text-muted" : "text-muted/70 italic"
+        }`}
+      >
+        {liveboard.description || "No description"}
+      </p>
+      <div className="mt-5 flex items-center justify-between gap-3 border-t border-line pt-4 text-xs">
+        <span className="flex min-w-0 items-center gap-2">
           <span
-            className={`h-2 w-12 rounded-full ${row === 1 ? "bg-red-200" : "bg-brand-300"}`}
-          />
-        </div>
-      ))}
+            aria-hidden="true"
+            className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-800"
+          >
+            {initials}
+          </span>
+          <span className="truncate font-semibold text-ink">{liveboard.author}</span>
+        </span>
+        {liveboard.modified !== null && (
+          <span className="flex shrink-0 items-center gap-1 text-muted">
+            <ClockIcon className="size-3.5" />
+            <time dateTime={new Date(liveboard.modified).toISOString()}>
+              {UPDATED_FORMAT.format(liveboard.modified)}
+            </time>
+          </span>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+function LiveboardGridSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Loading Liveboards">
+      <div className="h-5 w-32 animate-pulse rounded bg-line" />
+      <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map((index) => (
+          <li key={index} className="h-[196px] animate-pulse rounded-xl border border-line bg-white p-5">
+            <div className="size-9 rounded-lg bg-surface" />
+            <div className="mt-4 h-5 w-2/3 rounded bg-surface" />
+            <div className="mt-3 h-4 w-full rounded bg-surface" />
+            <div className="mt-2 h-4 w-4/5 rounded bg-surface" />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
