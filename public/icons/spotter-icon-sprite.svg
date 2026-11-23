@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="rd-icon-spotter" viewBox="0 0 48 48">
+    <rect width="48" height="48" rx="12" fill="#006A4D"/>
+    <path d="M12 3.5 13.8 9a1.5 1.5 0 0 0 1 1l5.7 2-5.7 2a1.5 1.5 0 0 0-1 1L12 20.5 10.2 15a1.5 1.5 0 0 0-1-1L3.5 12l5.7-2a1.5 1.5 0 0 0 1-1L12 3.5Z" transform="translate(24 24) scale(1.6) translate(-12 -12)" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.9" stroke-linejoin="round"/>
+    <path d="M37 8.5 37.8 10.7a.6.6 0 0 0 .4.4l2.3.8-2.3.8a.6.6 0 0 0-.4.4L37 15.3l-.8-2.2a.6.6 0 0 0-.4-.4l-2.3-.8 2.3-.8a.6.6 0 0 0 .4-.4L37 8.5Z" fill="#8EDDB9"/>
+  </symbol>
+</svg>
