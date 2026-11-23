@@ -1,14 +1,15 @@
 # Using the Example Prompts
 
-These prompts are meant to be run **in order** (1 → 5) against this project using an AI coding tool. Each file is a self-contained prompt: open it, copy its entire contents, and paste it into your tool.
+These prompts are meant to be run **in order** (1 → 6) against this project using an AI coding tool. Each file is a self-contained prompt: open it, copy its entire contents, and paste it into your tool.
 
 | File | Purpose |
 | --- | --- |
 | `1-embed-mcp.md` | Wire the Scout chat to the ThoughtSpot MCP server |
-| `2-create-and-embed-liveboard.md` | Create a liveboard and embed it |
-| `3-modify-liveboard.md` | Modify the liveboard |
-| `4-embed-spotter.md` | Embed Spotter |
-| `5-apply-styles.md` | Apply custom styles |
+| `2-connect-overview-data.md` | Bring the Overview page to life with live data |
+| `3-create-and-embed-liveboard.md` | Create a liveboard and embed it |
+| `4-modify-liveboard.md` | Modify the liveboard |
+| `5-embed-spotter.md` | Embed Spotter |
+| `6-apply-styles.md` | Apply custom styles |
 | `example.md` | A trivial prompt for testing your setup |
 
 ## Before you start

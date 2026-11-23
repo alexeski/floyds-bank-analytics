@@ -4,7 +4,7 @@ Requirements:
 
 - Reuse the existing trusted-auth token endpoint. Initialize the SDK once from a shared, idempotent module that's only loaded in the browser (next/dynamic, ssr: false).
 - Use the Spotter 3 chat: set updatedSpotterChatPrompt: true and spotterExperienceVersion: SPOTTER_2026_11.
-- On the server, look up the 'Banking' model by exact name and pass its id as worksheetId, with disableSourceSelection: true. Wrap the server fetch in <Suspense>.
+- On the server, look up the 'Banking' model by exact name with findModelIdByName from lib/thoughtspot/rest.ts (from prompt 2) and pass its id as worksheetId, with disableSourceSelection: true. Wrap the server fetch in <Suspense>.
 - Enable the chat history sidebar with spotterSidebarConfig: enablePastConversationsSidebar: true, collapsed by default, title 'Chat history', new-chat button 'New conversation'.
 - Hide Spotter's generic sample questions.
 - Update the page header description to fit the banking model.
