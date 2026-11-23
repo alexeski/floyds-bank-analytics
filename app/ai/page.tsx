@@ -14,18 +14,25 @@ const SUGGESTED_QUESTIONS = [
   "Compare mortgage lending to last year",
 ] as const;
 
+/**
+ * A full-screen page: it fills the viewport below the sticky portal header
+ * (104px tall below md, 68px from md up) and uses the compact page header, so
+ * the chat area keeps as much height as possible. The footer is hidden here
+ * (see isFullScreenPath in app/components/chrome.ts), so the page never scrolls.
+ */
 export default function BankalyticsAiPage() {
   return (
-    <>
+    <div className="flex h-[calc(100dvh-104px)] min-h-[480px] flex-col md:h-[calc(100dvh-68px)]">
       <PageHeader
         eyebrow="Conversational analytics"
         title={`${PRODUCT_NAME} AI`}
         description="Ask questions about the bank's data in plain English and get answers with charts."
         icon={<SparkleIcon className="size-7" />}
+        variant="compact"
       />
-      <section className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8 sm:px-6">
-        <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-line bg-white">
-          <div className="flex flex-1 flex-col items-center justify-center px-6 py-14 text-center">
+      <section className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col px-4 py-6 sm:px-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-line bg-white">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-6 py-10 text-center">
             <span className="rounded-xl bg-brand-700 p-3.5 text-white shadow-lg shadow-brand-700/25">
               <SparkleIcon className="size-7" />
             </span>
@@ -70,6 +77,6 @@ export default function BankalyticsAiPage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ Requirements:
 - Hide Spotter's generic sample questions.
 - Update the page header description to fit the banking model.
 - Add 6 clickable starter-prompt chips above the embed, styled like the suggestion chips in app/components/banksy/BanksyBar.tsx. Each sends its question with HostEvent.SpotterSearch and is written against the Banking model's real columns, so look up the columns first and don't guess.
+- Keep the page's laptop-friendly layout: it already uses the compact page header (PageHeader variant="compact") and fills the viewport below the portal header with no page scroll (the footer is hidden on /ai). Keep both, put the starter-prompt chips in a single row that scrolls sideways instead of wrapping, and give the embed all the remaining height.
 - Keep embed props and handlers stable (module constants or useCallback) so the iframe isn't rebuilt. Make the embed fill the full available width and height of the page: give it style={{ height: "100%" }} and size its parents to match so the iframe doesn't collapse to 150px.
 
 Verification, in this order:

@@ -2,12 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import { BANK_NAME, PRODUCT_NAME } from "./brand";
-import { isMarketingPath } from "./chrome";
+import { isFullScreenPath, isMarketingPath } from "./chrome";
 
-/** Slim footer for the signed-in portal. Hidden on the marketing pages. */
+/** Slim footer for the signed-in portal. Hidden on marketing and full-screen pages. */
 export default function SiteFooter() {
   const pathname = usePathname();
-  if (isMarketingPath(pathname)) return null;
+  if (isMarketingPath(pathname) || isFullScreenPath(pathname)) return null;
 
   return (
     <footer className="border-t border-line bg-white">
