@@ -20,6 +20,7 @@ Rules for every step:
 - Do everything the specification asks, including its verification. Don't skip steps to be faster, and don't ask the user to confirm details the specification already settles.
 - `{{DEV_URL}}` in a specification means the running dev server: use the URL the user gives, otherwise `http://localhost:3000`.
 - Steps build on each other. Steps 3 and 5 reuse `lib/thoughtspot/rest.ts` from step 2, step 4 extends step 3's Liveboard page, and step 6 styles the embeds from steps 3 and 5. If something a step needs is missing, build that piece exactly as the earlier step's specification describes, and say so in your summary.
+- White label, in every step: the words "ThoughtSpot" and "Spotter" must never appear in anything a user can see, including loading states, error messages, and empty states. Say "Scout" for the assistant and "the analytics service" or "your data" otherwise. Code, imports, and comments are fine.
 - Never commit. Finish with a short summary of what changed and what you verified.
 
 <!-- BEGIN:nextjs-agent-rules -->
