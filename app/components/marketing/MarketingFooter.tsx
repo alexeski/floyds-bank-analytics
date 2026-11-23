@@ -46,7 +46,7 @@ export default function MarketingFooter() {
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-brand-200/70 sm:px-6 md:flex-row md:justify-between">
           <p>
             © 2026 {BANK_NAME}. {BANK_NAME} is a fictitious brand created for a
-            ThoughtSpot hands-on lab and is not affiliated with any real bank.
+            hands-on lab and is not affiliated with any real bank.
           </p>
           <p>All figures are sample data.</p>
         </div>

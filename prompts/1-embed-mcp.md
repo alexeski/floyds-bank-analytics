@@ -24,6 +24,12 @@ time with performance.now(). Don't run `next build` to check this.
 
 Banksy users have no direct access to ThoughtSpot: never render links to ThoughtSpot, or to
 a liveboard or answer that was created. Describe the result in text only.
+White label: the app is fully white-labeled, so the words "ThoughtSpot" and "Spotter" must
+never appear anywhere a user can see them: chat replies, status labels, error messages, or
+any UI text. Use neutral wording instead ("the analytics service", "your data", "Banksy").
+Tell the model in the system prompt never to mention ThoughtSpot, Spotter, MCP, or tool
+names. As a backstop, replace those words server-side in everything streamed to the browser
+(text, status, and errors), including when a word is split across two streamed chunks.
 Tool replies come back as markdown: render it properly (headings, lists, tables, bold, code),
 sanitized, with no raw HTML. Close the chat when I click outside it.
 

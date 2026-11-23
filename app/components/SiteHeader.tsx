@@ -26,17 +26,6 @@ export default function SiteHeader() {
     <header
       className="sticky top-0 z-30 bg-white shadow-[0_1px_0_var(--color-line),0_6px_18px_rgba(2,71,49,0.08)]"
     >
-      <div className="bg-brand-950 text-[12px] text-brand-200">
-        <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <span className="font-medium tracking-wide">
-            Commercial Banking · Enterprise Analytics
-          </span>
-          <span className="hidden items-center gap-1.5 sm:inline-flex">
-            <span className="size-1.5 rounded-full bg-brand-500" />
-            Internal use only
-          </span>
-        </div>
-      </div>
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 px-4 sm:px-6 md:h-[68px] md:flex-nowrap md:gap-x-10">
         <Link
           href="/home"

@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
           </p>
           <p className="flex items-center gap-1.5 text-sm text-muted">
             <LayersIcon className="size-4" />
-            Powered by ThoughtSpot Liveboards
+            Interactive Liveboards
           </p>
         </div>
 

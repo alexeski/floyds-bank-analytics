@@ -41,8 +41,7 @@ export default function LoginPage() {
             </ul>
           </div>
           <p className="text-xs text-brand-200/70">
-            {BANK_NAME} is a fictitious brand created for a ThoughtSpot hands-on
-            lab.
+            {BANK_NAME} is a fictitious brand created for a hands-on lab.
           </p>
         </div>
       </aside>

@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <BanksyProvider>
           {/* The header and footer read the pathname, so they sit in Suspense
               for routes whose path is only known at request time. */}
-          <Suspense fallback={<div className="h-[136px] bg-white md:h-[100px]" />}>
+          <Suspense fallback={<div className="h-[104px] bg-white md:h-[68px]" />}>
             <SiteHeader />
           </Suspense>
           <main className="flex flex-1 flex-col">{children}</main>
