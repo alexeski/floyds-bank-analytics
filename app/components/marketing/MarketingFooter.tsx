@@ -3,7 +3,7 @@ import { BANK_NAME, Logo, PRODUCT_NAME } from "../brand";
 const COLUMNS = [
   {
     title: PRODUCT_NAME,
-    links: ["Platform overview", "Banksy AI", "Liveboards", "Release notes"],
+    links: ["Platform overview", "Scout AI", "Liveboards", "Release notes"],
   },
   {
     title: "Lines of business",

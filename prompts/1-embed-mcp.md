@@ -1,5 +1,5 @@
-Wire the Banksy chat (app/components/banksy/) to the ThoughtSpot MCP server at TS_MCP_URL,
-following ARCHITECTURE.md (/api/banksy route, streamed NDJSON, browser holds the transcript).
+Wire the Scout chat (app/components/scout/) to the ThoughtSpot MCP server at TS_MCP_URL,
+following ARCHITECTURE.md (/api/scout route, streamed NDJSON, browser holds the transcript).
 
 LLM: Anthropic TS SDK → LiteLLM proxy (LITELLM_URL / \_API_KEY / \_MODEL / \_MAX_TOKENS).
 Don't print .env.local values; normalize them defensively (scheme, slashes, /v1, quotes).
@@ -22,11 +22,11 @@ Cache Components is on: never call Date.now() / new Date() / Math.random() durin
 or in a useState initializer. Record start times in event handlers or useEffect, and
 time with performance.now(). Don't run `next build` to check this.
 
-Banksy users have no direct access to ThoughtSpot: never render links to ThoughtSpot, or to
+Scout users have no direct access to ThoughtSpot: never render links to ThoughtSpot, or to
 a liveboard or answer that was created. Describe the result in text only.
 White label: the app is fully white-labeled, so the words "ThoughtSpot" and "Spotter" must
 never appear anywhere a user can see them: chat replies, status labels, error messages, or
-any UI text. Use neutral wording instead ("the analytics service", "your data", "Banksy").
+any UI text. Use neutral wording instead ("the analytics service", "your data", "Scout").
 Tell the model in the system prompt never to mention ThoughtSpot, Spotter, MCP, or tool
 names. As a backstop, replace those words server-side in everything streamed to the browser
 (text, status, and errors), including when a word is split across two streamed chunks.
@@ -35,6 +35,6 @@ sanitized, with no raw HTML. Close the chat when I click outside it.
 
 Testing, keep it minimal: run typecheck and lint, then ONE Node script (fetch, no browser,
 no Playwright or other headless browser) against {{DEV_URL}} that sends a simple question to
-/api/banksy and checks that it streams a reply. Don't create liveboards as a test.
+/api/scout and checks that it streams a reply. Don't create liveboards as a test.
 
 Don't commit.

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { ArrowRightIcon, SparkleIcon } from "../icons";
-import { useBanksy } from "./BanksyProvider";
+import { useScout } from "./ScoutProvider";
 
 const SUGGESTIONS = [
   "Which regions grew current account balances fastest?",
@@ -10,8 +10,8 @@ const SUGGESTIONS = [
   "Savings attrition by customer age",
 ] as const;
 
-export default function BanksyBar() {
-  const { ask, openChat } = useBanksy();
+export default function ScoutBar() {
+  const { ask, openChat } = useScout();
   const [question, setQuestion] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -31,17 +31,17 @@ export default function BanksyBar() {
         className="flex flex-col gap-3 rounded-xl border border-brand-200 bg-brand-50/60 p-3 sm:flex-row sm:items-center"
       >
         <label
-          htmlFor="banksy-bar-input"
+          htmlFor="scout-bar-input"
           className="flex shrink-0 items-center gap-2 pl-1 text-sm font-bold text-brand-900"
         >
           <span className="rounded-md bg-brand-700 p-1.5 text-white">
             <SparkleIcon className="size-4" />
           </span>
-          Ask Banksy
+          Ask Scout
         </label>
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-white py-1 pr-1 pl-4 transition-colors focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-500/20">
           <input
-            id="banksy-bar-input"
+            id="scout-bar-input"
             type="text"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}

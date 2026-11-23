@@ -8,32 +8,32 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import BanksyChat from "./BanksyChat";
-import { askBanksy, type BanksyMessage } from "./askBanksy";
+import ScoutChat from "./ScoutChat";
+import { askScout, type ScoutMessage } from "./askScout";
 
-type BanksyContextValue = {
+type ScoutContextValue = {
   isOpen: boolean;
   isThinking: boolean;
-  messages: readonly BanksyMessage[];
+  messages: readonly ScoutMessage[];
   openChat: () => void;
   closeChat: () => void;
   ask: (question: string) => Promise<void>;
 };
 
-const BanksyContext = createContext<BanksyContextValue | null>(null);
+const ScoutContext = createContext<ScoutContextValue | null>(null);
 
-export function useBanksy() {
-  const context = useContext(BanksyContext);
+export function useScout() {
+  const context = useContext(ScoutContext);
   if (!context) {
-    throw new Error("useBanksy must be used within a BanksyProvider");
+    throw new Error("useScout must be used within a ScoutProvider");
   }
   return context;
 }
 
-export default function BanksyProvider({ children }: { children: ReactNode }) {
+export default function ScoutProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [messages, setMessages] = useState<BanksyMessage[]>([]);
+  const [messages, setMessages] = useState<ScoutMessage[]>([]);
 
   const openChat = useCallback(() => setIsOpen(true), []);
   const closeChat = useCallback(() => setIsOpen(false), []);
@@ -43,7 +43,7 @@ export default function BanksyProvider({ children }: { children: ReactNode }) {
       const content = question.trim();
       if (!content) return;
 
-      const userMessage: BanksyMessage = {
+      const userMessage: ScoutMessage = {
         id: crypto.randomUUID(),
         role: "user",
         content,
@@ -52,7 +52,7 @@ export default function BanksyProvider({ children }: { children: ReactNode }) {
       setMessages((prev) => [...prev, userMessage]);
       setIsThinking(true);
       try {
-        const reply = await askBanksy(content, [...messages, userMessage]);
+        const reply = await askScout(content, [...messages, userMessage]);
         setMessages((prev) => [
           ...prev,
           { id: crypto.randomUUID(), role: "assistant", content: reply },
@@ -70,9 +70,9 @@ export default function BanksyProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <BanksyContext value={value}>
+    <ScoutContext value={value}>
       {children}
-      <BanksyChat />
-    </BanksyContext>
+      <ScoutChat />
+    </ScoutContext>
   );
 }

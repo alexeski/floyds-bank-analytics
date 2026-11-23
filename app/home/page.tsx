@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import BanksyBar from "../components/banksy/BanksyBar";
+import ScoutBar from "../components/scout/ScoutBar";
 import { BANK_NAME, PRODUCT_NAME } from "../components/brand";
 import BusinessLineIcon from "../components/BusinessLineIcon";
 import Sparkline from "../components/charts/Sparkline";
@@ -95,7 +95,7 @@ export default function OverviewPage() {
             </div>
           </dl>
         </div>
-        <BanksyBar />
+        <ScoutBar />
       </section>
 
       <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8 sm:px-6">

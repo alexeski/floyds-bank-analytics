@@ -6,7 +6,7 @@ const SEGMENTS = ["Personal", "Business", "Commercial"] as const;
 
 const NAV_LINKS = [
   { href: "/#platform", label: "Platform" },
-  { href: "/#banksy", label: "Banksy AI" },
+  { href: "/#scout", label: "Scout AI" },
   { href: "/#security", label: "Security" },
   { href: "/#contact", label: "Contact" },
 ] as const;

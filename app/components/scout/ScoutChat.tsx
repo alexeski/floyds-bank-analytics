@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CloseIcon, SendIcon, SparkleIcon } from "../icons";
-import { useBanksy } from "./BanksyProvider";
+import { useScout } from "./ScoutProvider";
 
 const STARTERS = [
   "How did customer deposits change this quarter?",
@@ -10,8 +10,8 @@ const STARTERS = [
   "Show small business clients by region",
 ] as const;
 
-export default function BanksyChat() {
-  const { isOpen, isThinking, messages, closeChat, ask } = useBanksy();
+export default function ScoutChat() {
+  const { isOpen, isThinking, messages, closeChat, ask } = useScout();
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ export default function BanksyChat() {
     <div
       role="dialog"
       aria-modal="false"
-      aria-labelledby="banksy-chat-title"
+      aria-labelledby="scout-chat-title"
       className="fixed inset-x-4 bottom-4 z-40 flex max-h-[min(660px,calc(100vh-7rem))] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xl shadow-brand-950/25 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[420px]"
     >
       <div className="relative flex items-center gap-3 overflow-hidden bg-brand-900 px-4 py-3.5 text-white">
@@ -56,8 +56,8 @@ export default function BanksyChat() {
           <SparkleIcon className="size-5" />
         </span>
         <div className="relative min-w-0 flex-1">
-          <h2 id="banksy-chat-title" className="text-sm font-bold">
-            Banksy
+          <h2 id="scout-chat-title" className="text-sm font-bold">
+            Scout
           </h2>
           <p className="flex items-center gap-1.5 text-xs text-brand-200">
             <span className="size-1.5 rounded-full bg-brand-400" />
@@ -67,7 +67,7 @@ export default function BanksyChat() {
         <button
           type="button"
           onClick={closeChat}
-          aria-label="Close Banksy chat"
+          aria-label="Close Scout chat"
           className="relative rounded-md p-1.5 text-brand-200 transition-colors hover:bg-white/10 hover:text-white"
         >
           <CloseIcon className="size-5" />
@@ -78,7 +78,7 @@ export default function BanksyChat() {
         {messages.length === 0 && (
           <div className="py-4">
             <p className="text-sm font-semibold text-ink">
-              Hello, I&rsquo;m Banksy.
+              Hello, I&rsquo;m Scout.
             </p>
             <p className="mt-1 text-sm text-muted">
               Ask me about deposits, cards, lending, customers, and more. Here
@@ -125,7 +125,7 @@ export default function BanksyChat() {
               <span className="size-1.5 animate-pulse rounded-full bg-brand-600 [animation-delay:150ms]" />
               <span className="size-1.5 animate-pulse rounded-full bg-brand-600 [animation-delay:300ms]" />
             </span>
-            Banksy is thinking…
+            Scout is thinking…
           </p>
         )}
         <div ref={endRef} />
@@ -135,12 +135,12 @@ export default function BanksyChat() {
         onSubmit={handleSubmit}
         className="flex items-center gap-2 border-t border-line bg-white p-3"
       >
-        <label htmlFor="banksy-chat-input" className="sr-only">
-          Ask Banksy a question
+        <label htmlFor="scout-chat-input" className="sr-only">
+          Ask Scout a question
         </label>
         <input
           ref={inputRef}
-          id="banksy-chat-input"
+          id="scout-chat-input"
           type="text"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}

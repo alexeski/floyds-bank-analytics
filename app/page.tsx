@@ -68,7 +68,7 @@ export default function LandingPage() {
               <span className="rounded-full bg-brand-500 px-2 py-0.5 text-[11px] font-bold text-brand-950">
                 New
               </span>
-              Meet Banksy, your AI data analyst
+              Meet Scout, your AI data analyst
             </p>
             <h1 className="mt-6 text-[44px] leading-[1.04] font-extrabold tracking-tight sm:text-6xl">
               Every number behind the bank.{" "}
@@ -147,18 +147,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Banksy */}
-      <section id="banksy" className="scroll-mt-28 bg-surface">
+      {/* Scout */}
+      <section id="scout" className="scroll-mt-28 bg-surface">
         <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.14em] text-brand-700">
-              Banksy AI
+              Scout AI
             </p>
             <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-ink">
               Ask in plain English. Get the answer, not a ticket.
             </h2>
             <p className="mt-4 text-lg text-muted">
-              Banksy understands the bank&rsquo;s data model, so relationship
+              Scout understands the bank&rsquo;s data model, so relationship
               managers, product owners, and analysts can explore without
               writing SQL or waiting on a report.
             </p>
@@ -192,7 +192,7 @@ export default function LandingPage() {
               <span className="rounded-md bg-brand-700 p-1.5 text-white">
                 <SparkleIcon className="size-4" />
               </span>
-              <span className="font-bold text-ink">Banksy</span>
+              <span className="font-bold text-ink">Scout</span>
               <span className="ml-auto text-xs text-muted">Banking model</span>
             </div>
             <div className="space-y-4 pt-5">
@@ -344,7 +344,7 @@ function HeroPreview() {
           <span className="rounded-md bg-brand-700 p-1 text-white">
             <SparkleIcon className="size-3.5" />
           </span>
-          <span className="text-xs font-bold">Banksy</span>
+          <span className="text-xs font-bold">Scout</span>
         </div>
         <p className="mt-2 text-sm leading-snug">
           Card spend on travel is up <strong className="text-gain">12%</strong>{" "}

@@ -3,7 +3,7 @@
 Bankalytics is a Next.js banking analytics portal for ThoughtSpot hands-on labs. It shows ThoughtSpot content in two ways:
 
 - **Embedded analytics:** Liveboards and Spotter are embedded in the page with the ThoughtSpot Visual Embed SDK.
-- **Banksy:** a chat assistant. An LLM answers questions by calling ThoughtSpot tools through the Spotter MCP server.
+- **Scout:** a chat assistant. An LLM answers questions by calling ThoughtSpot tools through the Spotter MCP server.
 
 Both paths authenticate to ThoughtSpot with tokens issued by the token service, `ts-embed-lab-token-service`. The app never holds the ThoughtSpot secret key.
 
@@ -11,11 +11,11 @@ Both paths authenticate to ThoughtSpot with tokens issued by the token service, 
 
 | Component | What it does | Where it runs |
 | --- | --- | --- |
-| **Bankalytics app** | The Next.js UI and its server-side API routes. It embeds ThoughtSpot content, gets tokens from the token service, and runs the Banksy agent loop. | Lab attendee's machine (`npm run dev`) |
+| **Bankalytics app** | The Next.js UI and its server-side API routes. It embeds ThoughtSpot content, gets tokens from the token service, and runs the Scout agent loop. | Lab attendee's machine (`npm run dev`) |
 | **Token service** (`ts-embed-lab-token-service`) | Checks that a caller is a valid lab user, then mints a ThoughtSpot trusted-auth token for them. It is the only component that holds the ThoughtSpot secret key. | Shared lab service |
 | **ThoughtSpot** | The analytics platform. It hosts the banking data model, Liveboards, and Spotter, and it issues tokens to the token service. | ThoughtSpot Cloud instance |
 | **Spotter MCP server** | Exposes ThoughtSpot search and Spotter analysis as Model Context Protocol (MCP) tools. Calls it receives run against ThoughtSpot as the user who owns the bearer token. | `agent.thoughtspot.app` (hosted by ThoughtSpot) |
-| **LLM service** (`hol-ai-gateway`) | A LiteLLM proxy that fronts the model behind Banksy (Claude). The app sends it messages and tool definitions in the Anthropic Messages format. It holds the provider keys; the app holds only a shared gateway key. | Shared lab service (Vercel) |
+| **LLM service** (`hol-ai-gateway`) | A LiteLLM proxy that fronts the model behind Scout (Claude). The app sends it messages and tool definitions in the Anthropic Messages format. It holds the provider keys; the app holds only a shared gateway key. | Shared lab service (Vercel) |
 
 ## System overview
 
@@ -24,9 +24,9 @@ flowchart LR
     user(["Lab attendee<br/>(browser)"])
 
     subgraph app["Bankalytics app (Next.js)"]
-        ui["UI pages<br/>Landing, Log on, Overview,<br/>Analytics, Bankalytics AI, Banksy chat"]
+        ui["UI pages<br/>Landing, Log on, Overview,<br/>Analytics, Bankalytics AI, Scout chat"]
         tokenRoute["/api/thoughtspot/token"]
-        banksyRoute["/api/banksy<br/>agent loop"]
+        scoutRoute["/api/scout<br/>agent loop"]
     end
 
     tokenSvc["ts-embed-lab-token-service"]
@@ -37,14 +37,14 @@ flowchart LR
     user --> ui
     ui -- "Visual Embed SDK iframe" --> ts
     ui -- "getAuthToken" --> tokenRoute
-    ui -- "chat question (streamed reply)" --> banksyRoute
+    ui -- "chat question (streamed reply)" --> scoutRoute
 
     tokenRoute -- "request token" --> tokenSvc
-    banksyRoute -- "request token" --> tokenSvc
+    scoutRoute -- "request token" --> tokenSvc
     tokenSvc -- "trusted auth<br/>(secret key)" --> ts
 
-    banksyRoute -- "messages + tools" --> llm
-    banksyRoute -- "MCP tool calls<br/>(bearer token)" --> mcp
+    scoutRoute -- "messages + tools" --> llm
+    scoutRoute -- "MCP tool calls<br/>(bearer token)" --> mcp
     mcp -- "REST / Spotter APIs" --> ts
 ```
 
@@ -80,13 +80,13 @@ sequenceDiagram
 
 The SDK uses `AuthType.TrustedAuthTokenCookieless`, so ThoughtSpot gets the token directly and no third-party cookies are needed.
 
-### Banksy chat (LLM + MCP)
+### Scout chat (LLM + MCP)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant B as Browser (Banksy chat)
-    participant A as Bankalytics /api/banksy
+    participant B as Browser (Scout chat)
+    participant A as Bankalytics /api/scout
     participant T as Token service
     participant L as LLM service (LiteLLM)
     participant M as Spotter MCP server
@@ -110,7 +110,7 @@ sequenceDiagram
     A-->>B: Answer (streamed)
 ```
 
-The agent loop runs on the server. The browser talks only to `/api/banksy`, and never to the LLM service or the MCP server directly. Spotter analysis can take minutes, so the route streams status updates while tools run.
+The agent loop runs on the server. The browser talks only to `/api/scout`, and never to the LLM service or the MCP server directly. Spotter analysis can take minutes, so the route streams status updates while tools run.
 
 ## Trust boundaries and secrets
 

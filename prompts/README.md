@@ -4,7 +4,7 @@ These prompts are meant to be run **in order** (1 → 5) against this project us
 
 | File | Purpose |
 | --- | --- |
-| `1-embed-mcp.md` | Wire the Banksy chat to the ThoughtSpot MCP server |
+| `1-embed-mcp.md` | Wire the Scout chat to the ThoughtSpot MCP server |
 | `2-create-and-embed-liveboard.md` | Create a liveboard and embed it |
 | `3-modify-liveboard.md` | Modify the liveboard |
 | `4-embed-spotter.md` | Embed Spotter |

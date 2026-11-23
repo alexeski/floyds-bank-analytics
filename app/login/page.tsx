@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 const HIGHLIGHTS = [
   "Live Liveboards for every line of business",
-  "Banksy, your AI data analyst",
+  "Scout, your AI data analyst",
   "Row-level security on every query",
 ] as const;
 

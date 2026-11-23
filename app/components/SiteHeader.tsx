@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import BanksyButton from "./banksy/BanksyButton";
+import ScoutButton from "./scout/ScoutButton";
 import { Logo, PRODUCT_NAME } from "./brand";
 import { isMarketingPath } from "./chrome";
 import { LogOutIcon } from "./icons";
@@ -58,7 +58,7 @@ export default function SiteHeader() {
           })}
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <BanksyButton />
+          <ScoutButton />
           <Link
             href="/"
             className="hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-brand-800 transition-colors hover:bg-brand-50 md:inline-flex"
