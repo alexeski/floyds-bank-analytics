@@ -12,6 +12,21 @@ These prompts are meant to be run **in order** (1 → 6) against this project us
 | `6-apply-styles.md` | Apply custom styles |
 | `example.md` | A trivial prompt for testing your setup |
 
+## The one-line version
+
+Each prompt file is also available as a one-liner. The project's `AGENTS.md` (which Claude Code reads through `CLAUDE.md`, and which most other coding agents read directly) maps short requests to the full prompt files, so the agent loads the complete specification on its own. Type these instead of pasting a file:
+
+| Step | Type this |
+| --- | --- |
+| 1 | Connect Scout to our bank's data. |
+| 2 | Make the Overview page live. |
+| 3 | Show our Liveboards on the Analytics page and open each one embedded. |
+| 4 | Add "View as table" to every chart. |
+| 5 | Put Spotter on the Bankalytics AI page. |
+| 6 | Make the embedded analytics match our portal. |
+
+If a one-liner goes off track, revert with `git restore .` and paste the full prompt file instead.
+
 ## Before you start
 
 1. Open a terminal in the **project root** (not this folder), so the tool can see the whole codebase.
