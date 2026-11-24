@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { getOverviewData } from "@/lib/overview/data";
-import { SPEC_COUNT, SPEC_META } from "@/lib/overview/spec";
 import { isRegion, type OverviewData } from "@/lib/overview/types";
 import {
   SERIES,
@@ -16,7 +15,7 @@ import BusinessLineIcon from "../components/BusinessLineIcon";
 import AnimatedNumber, { type NumberFormat } from "../components/charts/AnimatedNumber";
 import GrowthChart from "../components/charts/GrowthChart";
 import Sparkline from "../components/charts/Sparkline";
-import { AlertIcon, ArrowRightIcon, ArrowUpRightIcon, CheckIcon, TrendDownIcon, TrendUpIcon, UserIcon } from "../components/icons";
+import { AlertIcon, ArrowRightIcon, ArrowUpRightIcon, TrendDownIcon, TrendUpIcon, UserIcon } from "../components/icons";
 import { AgeColumns, ProductBars } from "./BreakdownCharts";
 import OverviewSpec from "./OverviewSpec";
 import RegionChart from "./RegionChart";
@@ -78,10 +77,6 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
         </span>
         <span className="font-semibold text-ink">{scope}</span>·<span>last {periodText}</span>·
         <span>statements to {monthYear(data.asOf)}</span>
-        <span className="inline-flex items-center gap-1 sm:ml-auto">
-          <CheckIcon className="size-3.5 text-brand-600" />
-          Built to design spec {SPEC_META.version} · {SPEC_COUNT} of {SPEC_COUNT} widgets live
-        </span>
       </p>
 
       {/* KPIs */}
@@ -92,7 +87,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
           format="money"
           step={1}
           change={percentChange(deposits[0], deposits.at(-1) ?? 0)}
-          caption={`vs ${monthLabel(first.month, true)}`}
+          startLabel={monthLabel(first.month, true)}
           trend={deposits}
           labels={labels}
           color="#006a4d"
@@ -103,7 +98,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
           format="money"
           step={2}
           change={percentChange(first.savings, last.savings)}
-          caption={`vs ${monthLabel(first.month, true)}`}
+          startLabel={monthLabel(first.month, true)}
           trend={range.map((m) => m.savings)}
           labels={labels}
           color={SERIES.savings}
@@ -114,7 +109,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
           format="money"
           step={3}
           change={percentChange(first.cards, last.cards)}
-          caption={`vs ${monthLabel(first.month, true)}`}
+          startLabel={monthLabel(first.month, true)}
           trend={range.map((m) => m.cards)}
           labels={labels}
           color={SERIES.cards}
@@ -122,9 +117,11 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
         />
         <div className="motion-rise rounded-xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(2,71,49,0.04)]" style={rise(4)}>
           <p className="text-sm font-semibold text-muted">Customers</p>
-          <p className="mt-2 text-[28px] leading-none font-extrabold tracking-tight text-ink">
-            <AnimatedNumber value={t.customers} format="count" />
-          </p>
+          <div className="mt-2 flex h-12 items-end">
+            <p className="text-[28px] leading-none font-extrabold tracking-tight text-ink">
+              <AnimatedNumber value={t.customers} format="count" />
+            </p>
+          </div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-3 text-xs">
             <div>
               <dt className="text-muted">Avg credit score</dt>
@@ -313,13 +310,22 @@ function Legend({ color, label, value }: { color: string; label: string; value?:
   );
 }
 
-function ChangeBadge({ change, neutral = false }: { change: number; neutral?: boolean }) {
+function ChangeBadge({
+  change,
+  neutral = false,
+  size = "sm",
+}: {
+  change: number;
+  neutral?: boolean;
+  size?: "sm" | "lg";
+}) {
   const up = change >= 0;
   const Icon = up ? TrendUpIcon : TrendDownIcon;
-  const tone = neutral ? "text-muted" : up ? "text-gain" : "text-loss";
+  const tone = neutral ? "text-ink" : up ? "text-gain" : "text-loss";
+  const scale = size === "lg" ? "text-base" : "text-xs";
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-bold tabular-nums ${tone}`}>
-      <Icon className="size-3.5" />
+    <span className={`inline-flex items-center gap-1 font-bold tabular-nums ${scale} ${tone}`}>
+      <Icon className={size === "lg" ? "size-4" : "size-3.5"} />
       <AnimatedNumber value={change} format="percent" />
     </span>
   );
@@ -331,7 +337,7 @@ function KpiTile({
   format,
   step,
   change,
-  caption,
+  startLabel,
   trend,
   labels,
   color,
@@ -342,7 +348,8 @@ function KpiTile({
   format: NumberFormat;
   step: number;
   change: number;
-  caption: string;
+  /** The first month of the period, which the change is measured against. */
+  startLabel: string;
   trend: readonly number[];
   labels: readonly string[];
   color: string;
@@ -351,18 +358,26 @@ function KpiTile({
   return (
     <div className="motion-rise rounded-xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(2,71,49,0.04)]" style={rise(step)}>
       <p className="text-sm font-semibold text-muted">{label}</p>
-      <div className="mt-2 flex items-end justify-between gap-3">
-        <div>
-          <p className="text-[28px] leading-none font-extrabold tracking-tight text-ink">
-            <AnimatedNumber value={value} format={format} />
-          </p>
-          <p className="mt-2 flex items-center gap-1.5">
-            <ChangeBadge change={change} neutral={neutral} />
-            <span className="text-xs text-muted">{caption}</span>
-          </p>
-        </div>
+      <div className="mt-2 flex h-12 items-end justify-between gap-3">
+        <p className="text-[28px] leading-none font-extrabold tracking-tight text-ink">
+          <AnimatedNumber value={value} format={format} />
+        </p>
         <Sparkline values={trend} labels={labels} format="money" label={`${label} by month`} color={color} className="h-12 w-28" />
       </div>
+      <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-3 text-xs">
+        <div>
+          <dt className="text-muted">In {startLabel}</dt>
+          <dd className="mt-0.5 text-base font-bold text-ink">
+            <AnimatedNumber value={trend[0] ?? NaN} format={format} />
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted">Change</dt>
+          <dd className="mt-0.5">
+            <ChangeBadge change={change} neutral={neutral} size="lg" />
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }
