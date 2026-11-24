@@ -24,7 +24,7 @@ export type MonthPoint = {
 };
 
 export type OverviewData = {
-  /** "placeholder" renders the page as a greyed-out preview; "live" lights it up. */
+  /** "placeholder" shows the design spec in place of the widgets; "live" lights it up. */
   source: "placeholder" | "live";
   /** The region the figures are filtered to, or null for all regions. */
   region: Region | null;

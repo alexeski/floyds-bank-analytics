@@ -3,7 +3,7 @@ import type { OverviewData, Region } from "./types";
 /**
  * Shape-only data for the Overview page before it is connected to the bank's
  * data. Totals are NaN so every figure shows as "—"; the series and
- * breakdowns only give the greyed-out preview charts something to draw.
+ * breakdowns only give the page valid shapes while it shows the design spec.
  */
 
 const FIRST_MONTH = Date.UTC(2025, 11, 1);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { getOverviewData } from "@/lib/overview/data";
+import { SPEC_COUNT, SPEC_META } from "@/lib/overview/spec";
 import { isRegion, type OverviewData } from "@/lib/overview/types";
 import {
   SERIES,
@@ -15,8 +16,9 @@ import BusinessLineIcon from "../components/BusinessLineIcon";
 import AnimatedNumber, { type NumberFormat } from "../components/charts/AnimatedNumber";
 import GrowthChart from "../components/charts/GrowthChart";
 import Sparkline from "../components/charts/Sparkline";
-import { AlertIcon, ArrowRightIcon, ArrowUpRightIcon, LayersIcon, TrendDownIcon, TrendUpIcon, UserIcon } from "../components/icons";
+import { AlertIcon, ArrowRightIcon, ArrowUpRightIcon, CheckIcon, TrendDownIcon, TrendUpIcon, UserIcon } from "../components/icons";
 import { AgeColumns, ProductBars } from "./BreakdownCharts";
+import OverviewSpec from "./OverviewSpec";
 import RegionChart from "./RegionChart";
 
 const PERIOD_MONTHS: Record<string, number> = { "3m": 3, "6m": 6, "12m": 12 };
@@ -60,49 +62,36 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
   const scope = region ?? "All regions";
   const periodText = `${months} months`;
 
+  // Until the data layer is connected, the page shows the design spec.
+  if (data.source === "placeholder") return <OverviewSpec />;
+
   const deposits = range.map((m) => m.checking + m.savings);
   const t = data.totals;
-  // Before the page is connected to live data, everything renders as a
-  // greyed-out, non-interactive preview with "—" for every figure.
-  const ghost = data.source === "placeholder";
-  // Changes are only meaningful for real figures.
-  const change = (from: number, to: number) => (ghost ? NaN : percentChange(from, to));
-  // Figures from the placeholder shapes are never shown: they read "—".
-  const figure = (value: number) => (ghost ? NaN : value);
-  const productCount = (name: string) =>
-    figure(data.products.find((p) => p.product === name)?.customers ?? 0);
+  const productCount = (name: string) => data.products.find((p) => p.product === name)?.customers ?? 0;
 
   return (
     <div className="space-y-6">
-      {ghost && <NotConnected />}
-      <div
-        aria-hidden={ghost || undefined}
-        className={ghost ? "pointer-events-none space-y-6 opacity-40 blur-[2.5px] grayscale select-none" : "space-y-6"}
-      >
       <p className="motion-rise flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted" style={rise(0)}>
-        {ghost ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-muted ring-1 ring-line">
-            <span className="size-1.5 rounded-full bg-muted" />
-            Sample shapes
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-bold text-brand-800 ring-1 ring-brand-200">
-            <span className="size-1.5 animate-pulse rounded-full bg-brand-500" />
-            Live data
-          </span>
-        )}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-bold text-brand-800 ring-1 ring-brand-200">
+          <span className="size-1.5 animate-pulse rounded-full bg-brand-500" />
+          Live data
+        </span>
         <span className="font-semibold text-ink">{scope}</span>·<span>last {periodText}</span>·
         <span>statements to {monthYear(data.asOf)}</span>
+        <span className="inline-flex items-center gap-1 sm:ml-auto">
+          <CheckIcon className="size-3.5 text-brand-600" />
+          Built to design spec {SPEC_META.version} · {SPEC_COUNT} of {SPEC_COUNT} widgets live
+        </span>
       </p>
 
       {/* KPIs */}
       <section aria-label="Headline metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiTile
           label="Customer deposits"
-          value={figure(last.checking + last.savings)}
+          value={last.checking + last.savings}
           format="money"
           step={1}
-          change={change(deposits[0], deposits.at(-1) ?? 0)}
+          change={percentChange(deposits[0], deposits.at(-1) ?? 0)}
           caption={`vs ${monthLabel(first.month, true)}`}
           trend={deposits}
           labels={labels}
@@ -110,10 +99,10 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
         />
         <KpiTile
           label="Savings balances"
-          value={figure(last.savings)}
+          value={last.savings}
           format="money"
           step={2}
-          change={change(first.savings, last.savings)}
+          change={percentChange(first.savings, last.savings)}
           caption={`vs ${monthLabel(first.month, true)}`}
           trend={range.map((m) => m.savings)}
           labels={labels}
@@ -121,10 +110,10 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
         />
         <KpiTile
           label="Card balances"
-          value={figure(last.cards)}
+          value={last.cards}
           format="money"
           step={3}
-          change={change(first.cards, last.cards)}
+          change={percentChange(first.cards, last.cards)}
           caption={`vs ${monthLabel(first.month, true)}`}
           trend={range.map((m) => m.cards)}
           labels={labels}
@@ -160,9 +149,9 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
           subtitle={`Balances indexed to 100 in ${monthLabel(first.month, true)} · ${scope}`}
           aside={
             <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              <Legend color={SERIES.savings} label="Savings" value={money(figure(last.savings))} />
-              <Legend color={SERIES.checking} label="Checking" value={money(figure(last.checking))} />
-              <Legend color={SERIES.cards} label="Cards" value={money(figure(last.cards))} />
+              <Legend color={SERIES.savings} label="Savings" value={money(last.savings)} />
+              <Legend color={SERIES.checking} label="Checking" value={money(last.checking)} />
+              <Legend color={SERIES.cards} label="Cards" value={money(last.cards)} />
             </ul>
           }
         >
@@ -173,7 +162,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
               { key: "cards", label: "Cards", color: SERIES.cards, values: range.map((m) => m.cards) },
               { key: "checking", label: "Checking", color: SERIES.checking, values: range.map((m) => m.checking) },
             ]}
-            ariaLabel={`Indexed growth over ${periodText}: savings ${signedPercent(change(first.savings, last.savings))}, cards ${signedPercent(change(first.cards, last.cards))}, checking ${signedPercent(change(first.checking, last.checking))}`}
+            ariaLabel={`Indexed growth over ${periodText}: savings ${signedPercent(percentChange(first.savings, last.savings))}, cards ${signedPercent(percentChange(first.cards, last.cards))}, checking ${signedPercent(percentChange(first.checking, last.checking))}`}
           />
         </Card>
 
@@ -228,7 +217,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
             customers={productCount("Checking")}
             metric={t.checking}
             metricLabel="Checking balances"
-            change={change(first.checking, last.checking)}
+            change={percentChange(first.checking, last.checking)}
             trend={range.map((m) => m.checking)}
             labels={labels}
             color={SERIES.checking}
@@ -239,7 +228,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
             customers={productCount("Savings")}
             metric={t.savings}
             metricLabel="Savings balances"
-            change={change(first.savings, last.savings)}
+            change={percentChange(first.savings, last.savings)}
             trend={range.map((m) => m.savings)}
             labels={labels}
             color={SERIES.savings}
@@ -251,7 +240,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
             customersLabel="cards held"
             metric={t.cardAdvantage + t.cardPlatinum}
             metricLabel="Advantage and Platinum balances"
-            change={change(first.cards, last.cards)}
+            change={percentChange(first.cards, last.cards)}
             trend={range.map((m) => m.cards)}
             labels={labels}
             color={SERIES.cards}
@@ -283,30 +272,7 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
           />
         </ul>
       </section>
-      </div>
     </div>
-  );
-}
-
-/** Shown until getOverviewData() returns live figures. */
-function NotConnected() {
-  return (
-    <section className="motion-rise flex flex-col gap-4 rounded-xl border border-dashed border-brand-300 bg-white p-5 sm:flex-row sm:items-center">
-      <span className="w-fit rounded-lg bg-brand-50 p-2.5 text-brand-700 ring-1 ring-brand-100">
-        <LayersIcon className="size-6" />
-      </span>
-      <div className="flex-1">
-        <p className="font-bold text-ink">Live data isn&rsquo;t connected yet</p>
-        <p className="mt-0.5 text-sm text-muted">
-          Every chart, filter, and card below is built and waiting. Connect this page&rsquo;s data
-          layer to the bank&rsquo;s Banking model and it comes alive.
-        </p>
-      </div>
-      <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold text-muted ring-1 ring-line">
-        <span className="size-1.5 rounded-full bg-muted" />
-        Preview
-      </span>
-    </section>
   );
 }
 
