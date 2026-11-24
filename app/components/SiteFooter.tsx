@@ -16,7 +16,7 @@ export default function SiteFooter() {
           {BANK_NAME} · {PRODUCT_NAME} Enterprise Analytics
         </span>
         <span>
-          Figures shown are sample data. {BANK_NAME} is a fictitious bank.
+          {BANK_NAME} is a fictitious bank created for this lab.
         </span>
       </div>
     </footer>
