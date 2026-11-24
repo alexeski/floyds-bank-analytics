@@ -12,7 +12,7 @@ The app is branded for **Floyds Bank**, a fictitious UK bank created for the lab
 | --- | --- |
 | `/` | Public marketing landing page |
 | `/login` | Demo log-on page. No credentials are checked; **Log on** opens the portal. |
-| `/home` | Business overview: headline KPIs, deposit trend, lines of business, and signals (sample data) |
+| `/home` | Business overview: headline KPIs, deposit trend, lines of business, and signals, from live data (built to the design spec in lib/overview/spec.ts) |
 | `/analytics` | Liveboard catalogue (embedded Liveboards are added during the lab) |
 | `/ai` | Bankalytics AI (Spotter is embedded during the lab) |
 
