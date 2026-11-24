@@ -145,31 +145,41 @@ export type Signal = {
   title: string;
   detail: string;
   area: string;
+  /** A question Scout can answer from the Banking model to explain the signal. */
+  question: string;
 };
 
+/**
+ * Signals worth a look, taken from the Banking model's figures for the 12
+ * months to Nov 2026 (all regions). Each one hands Scout a follow-up question.
+ */
 export const SIGNALS: readonly Signal[] = [
   {
     tone: "critical",
-    title: "Unsecured arrears rose to 1.9%",
-    detail: "30+ day arrears on personal loans, up 0.2 pts on Q2.",
-    area: "Lending",
+    title: "12.6K customers rated Very Poor",
+    detail: "6% of the customer base sits in the lowest credit rating.",
+    area: "Credit",
+    question: "How many customers have a Very Poor credit rating, by customer region and age group?",
   },
   {
     tone: "warning",
-    title: "Savings outflows up 6% for ages 18–24",
-    detail: "Concentrated in easy-access accounts after the base-rate cut.",
+    title: "Checking balances flat over 12 months",
+    detail: "Up just 0.7% while savings grew 10%: cash is moving into savings.",
+    area: "Current accounts",
+    question: "How did total checking and savings balances change month by month over the last 12 months?",
+  },
+  {
+    tone: "good",
+    title: "Savings balances up 10% in 12 months",
+    detail: "The fastest-growing balance type, ahead of cards (+4.9%) and checking (+0.7%).",
     area: "Savings",
+    question: "Which customer age groups grew their savings balances the most over the last 12 months?",
   },
   {
     tone: "good",
-    title: "Travel card spend up 12% QoQ",
-    detail: "Driven by Premier and Platinum cardholders in London and the South East.",
-    area: "Cards",
-  },
-  {
-    tone: "good",
-    title: "Mobile log-ons passed 1bn",
-    detail: "First quarter over a billion app sessions; 81% of customers are digitally active.",
-    area: "Digital",
+    title: "East holds the most deposits: $538M",
+    detail: "1.8 times the Southwest ($297M), the smallest region.",
+    area: "Regions",
+    question: "Compare total checking and savings balances by customer region.",
   },
 ];

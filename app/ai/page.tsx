@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 const SUGGESTED_QUESTIONS = [
-  "What was credit card spend by category last quarter?",
-  "Which regions grew current account balances fastest?",
-  "Show savings attrition by customer tenure",
-  "Compare mortgage lending to last year",
+  "Which regions grew savings balances fastest?",
+  "Card balances by credit rating",
+  "Average savings balance by customer age group",
+  "Mortgage balances by customer region",
 ] as const;
 
 /**
