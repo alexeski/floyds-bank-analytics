@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AccountMenu from "./AccountMenu";
 import ScoutButton from "./scout/ScoutButton";
 import { Logo, PRODUCT_NAME } from "./brand";
 import { isMarketingPath } from "./chrome";
-import { LogOutIcon } from "./icons";
 
 const NAV_ITEMS = [
   { href: "/home", label: "Overview" },
@@ -57,15 +57,10 @@ export default function SiteHeader() {
             );
           })}
         </nav>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-3">
           <ScoutButton />
-          <Link
-            href="/"
-            className="hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-brand-800 transition-colors hover:bg-brand-50 md:inline-flex"
-          >
-            <LogOutIcon className="size-4" />
-            Log off
-          </Link>
+          <span aria-hidden="true" className="hidden h-7 w-px bg-line md:block" />
+          <AccountMenu />
         </div>
       </div>
     </header>

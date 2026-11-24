@@ -5,9 +5,9 @@ import { ArrowRightIcon, SparkleIcon } from "../icons";
 import { useScout } from "./ScoutProvider";
 
 const SUGGESTIONS = [
-  "Which regions grew current account balances fastest?",
-  "Top card spend categories this quarter",
-  "Savings attrition by customer age",
+  "Which regions grew savings balances fastest?",
+  "Card balances by credit rating",
+  "Average savings balance by customer age group",
 ] as const;
 
 export default function ScoutBar() {

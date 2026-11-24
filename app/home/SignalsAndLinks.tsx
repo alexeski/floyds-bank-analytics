@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { PRODUCT_NAME } from "../components/brand";
 import { AlertIcon, ArrowRightIcon, ChartIcon, CheckIcon, SparkleIcon } from "../components/icons";
 import { SIGNALS, type Signal } from "../components/sampleData";
+import AskAboutSignal from "./AskAboutSignal";
 
 const SIGNAL_STYLES: Record<
   Signal["tone"],
@@ -25,7 +26,7 @@ const SIGNAL_STYLES: Record<
   },
 };
 
-/** The Signals list (sample content for now) and the two quick links. */
+/** The Signals list (fixed figures from the Banking model) and the two quick links. */
 export default function SignalsAndLinks() {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
@@ -34,7 +35,7 @@ export default function SignalsAndLinks() {
           <div>
             <h2 className="text-lg font-bold tracking-tight">Signals</h2>
             <p className="text-sm text-muted">
-              Notable movements detected this quarter
+              Notable movements in the last 12 months. Ask Scout to explain any of them.
             </p>
           </div>
           <span className="rounded-full bg-surface px-2.5 py-1 text-xs font-semibold text-muted">
@@ -62,6 +63,7 @@ export default function SignalsAndLinks() {
                     </span>
                   </div>
                   <p className="mt-0.5 text-sm text-muted">{signal.detail}</p>
+                  <AskAboutSignal question={signal.question} />
                 </div>
                 <span className="hidden shrink-0 text-xs font-semibold text-muted sm:block">
                   {signal.area}
