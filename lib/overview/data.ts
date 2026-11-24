@@ -11,7 +11,7 @@ export type { MonthPoint, OverviewData, Region } from "./types";
  * Returns the Overview page's figures for a region (null means all regions).
  *
  * Not connected yet: this returns placeholder shapes, so the page renders as
- * a greyed-out preview. Lab prompt 2 replaces this function body with live
+ * the design spec (lib/overview/spec.ts). Lab prompt 2 replaces this function body with live
  * queries against the "Banking" model; the page lights up as soon as it
  * returns data with source: "live". The OverviewData contract in ./types.ts
  * stays the same.
