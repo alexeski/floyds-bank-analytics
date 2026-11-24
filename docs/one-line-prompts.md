@@ -1,10 +1,10 @@
-# One-line prompts: an alternative way to run the lab
+# One-line prompts
 
-This branch (`one-line-prompts`) is an experiment, kept apart from `main` until a decision is made. It lets the presenter and attendees ask for each lab step in one short sentence instead of pasting a long prompt, while still getting the same result.
+Adopted on 24 Nov 2026: `main` supports both ways of running the lab. Attendees can ask for each lab step in one short sentence, or paste the step's full prompt file, and get the same result either way. This note records how it works and how it was tested.
 
-## The two options
+## The two ways
 
-| | Detailed prompts (`main`, tag `detailed-prompts-v1`) | One-line prompts (this branch) |
+| | Detailed prompts | One-line prompts |
 | --- | --- | --- |
 | What attendees type | The full prompt file (copy and paste) | One sentence, for example "Make the Overview page live." |
 | Where the detail lives | In the prompt | In `prompts/`, found through `AGENTS.md` |
@@ -30,7 +30,7 @@ This branch (`one-line-prompts`) is an experiment, kept apart from `main` until 
 
 ## Rehearsal results (23 Nov 2026)
 
-All six one-liners were run in order on a fresh clone of this branch, each in a new non-interactive Claude Code session (model: claude-sonnet-5-5), so each step saw only the code earlier steps left behind. The only addition to each one-liner was the dev server's address, because the rehearsal ran on port 3200.
+All six one-liners were run in order on a fresh clone of the one-line setup, each in a new non-interactive Claude Code session (model: claude-sonnet-5-5), so each step saw only the code earlier steps left behind. The only addition to each one-liner was the dev server's address, because the rehearsal ran on port 3200.
 
 | Step | Time | Cost | Typecheck / lint | Result |
 | --- | --- | --- | --- | --- |
@@ -49,7 +49,7 @@ Checked independently: the Liveboard embed carries exactly the specified setting
 - **Fixed:** steps 3 and 5 put "Spotter" and "ThoughtSpot" in loading and error messages, because only prompt 1 states the white-label rule and each step runs in a fresh session. The rule now sits with the rules for every step in `AGENTS.md`.
 - **Open:** confirm the Spotter page renders, with the browser visible.
 
-## Before deciding
+## Still worth doing
 
 1. Rerun the rehearsal with the white-label fix and check every page in a visible browser (see below).
 2. Try the one-liners once in each other tool attendees will use (Cursor, GitHub Copilot).
@@ -57,14 +57,10 @@ Checked independently: the Liveboard embed carries exactly the specified setting
 
 ## How to rerun the rehearsal
 
-From a fresh clone of this branch with `npm install` done and `.env.local` in place, start a dev server on a spare port, then run:
+From a fresh clone with `npm install` done and `.env.local` in place, start a dev server on a spare port, then run:
 
 ```bash
 node scripts/rehearse-one-liners.mjs --repo . --dev http://localhost:3200 --out ../rehearsal-results
 ```
 
 It runs the six one-liners in order with Claude Code (`claude -p`), each in a fresh session, and writes per-step timing, cost, typecheck and lint results, page checks, and the agent's final message to `summary.jsonl` in the output folder. Each step is capped at 25 minutes.
-
-## How to adopt it
-
-Merge this branch into `main`. Nothing else changes: the prompt files stay as they are and remain the fallback. To drop the idea, delete the branch.
