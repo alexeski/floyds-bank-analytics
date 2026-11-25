@@ -31,6 +31,27 @@ exact title match), cache it, and put it in the system prompt with the rule: cal
 create_analysis_session with that data_source_id straight away, never search for a data
 source, and reuse the session for follow-ups. If the lookup fails, fall back to telling the
 model to make that one exact search itself. A session without data_source_id fails here.
+Charts: when an analysis answer comes with a chart, show it embedded under Scout's reply.
+A finished answer in get_session_updates is an update with type "answer" and is_thinking
+false; its iframe_url and answer_id carry the IDs the SDK's SpotterMessage React component
+(from @thoughtspot/visual-embed-sdk/react) needs: message = { worksheetId (the answer's
+answer_data_source_id), sessionId, genNo, acSessionId, acGenNo (from the iframe_url's hash),
+convId and messageId (conversation_id and message_id in the answer_id JSON) }. Read them on
+the server from the raw tool result, before links are stripped; only accept an iframe_url
+on the NEXT_PUBLIC_THOUGHTSPOT_HOST host, check each ID is plain [A-Za-z0-9_-], and stream
+only the IDs and the answer_title to the browser as a "chart" event. Never send or show the
+URL itself. One chart per answer (dedupe on messageId), at most 3 per reply. In the chat,
+render each chart under the reply's text in a white rounded card 680px tall (the embed can't
+size itself, and its title, chips, legend, axis and footer need up to ~670px), loaded
+client-only (next/dynamic with ssr: false) and mounted only once the SDK init that
+app/components/thoughtspot/ThoughtSpotInit.tsx runs has finished (expose a shared "ready"
+promise if there isn't one; keep a single init call); if the embed reports a fatal error,
+show a one-line message in the card instead. Tell the model in the system prompt that the
+chart appears under its reply automatically, so it gives the headline and two or three key
+points and doesn't repeat the data as a table unless asked.
+Layout: the chat is a full-height drawer on the right (app/components/scout/ScoutChat.tsx)
+opened from the floating "Ask Scout" launcher (ScoutButton.tsx). Keep that layout, its
+New chat and Wider buttons, and keep it mounted while closed so charts don't reload.
 Cache Components is on: never call Date.now() / new Date() / Math.random() during render
 or in a useState initializer. Record start times in event handlers or useEffect, and
 time with performance.now(). Don't run `next build` to check this.
@@ -49,6 +70,7 @@ sanitized, with no raw HTML. Close the chat when I click outside it.
 Testing, keep it minimal: run typecheck and lint, then ONE Node script (fetch, no browser,
 no Playwright or other headless browser) against {{DEV_URL}} that sends a simple question to
 /api/scout and checks that it streams a reply, and that the reply shown (after any discard)
-has no narration such as "Let me" or "I'll". Don't create liveboards as a test.
+has no narration such as "Let me" or "I'll", and that a data question streams a chart event
+with every ID filled in. Don't create liveboards as a test.
 
 Don't commit.

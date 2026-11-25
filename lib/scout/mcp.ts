@@ -15,7 +15,13 @@ export type McpTool = {
   inputSchema: { type: "object"; [key: string]: unknown };
 };
 
-export type ToolOutcome = { text: string; isError: boolean };
+export type ToolOutcome = {
+  /** The result as the model sees it: links removed, length capped. */
+  text: string;
+  /** The untouched result, for the server's own use only (never sent to the model or browser). */
+  raw: string;
+  isError: boolean;
+};
 
 export type McpSession = {
   tools: McpTool[];
@@ -38,7 +44,7 @@ function stripLinks(text: string): string {
   return text.replace(/\bhttps?:\/\/[^\s"'<>)\]]+/gi, "[link removed]");
 }
 
-function toText(result: Awaited<ReturnType<Client["callTool"]>>): string {
+function rawText(result: Awaited<ReturnType<Client["callTool"]>>): string {
   const parts: string[] = [];
   if (Array.isArray(result.content)) {
     for (const part of result.content) {
@@ -49,7 +55,11 @@ function toText(result: Awaited<ReturnType<Client["callTool"]>>): string {
   if (parts.length === 0 && result.structuredContent) {
     parts.push(JSON.stringify(result.structuredContent));
   }
-  const text = stripLinks(parts.join("\n\n"));
+  return parts.join("\n\n");
+}
+
+function toModelText(raw: string): string {
+  const text = stripLinks(raw);
   return text.length > MAX_TOOL_RESULT_CHARS
     ? `${text.slice(0, MAX_TOOL_RESULT_CHARS)}\n\n[Result truncated]`
     : text;
@@ -127,13 +137,12 @@ export async function openMcpSession(
             },
           },
         );
-        return { text: toText(result), isError: result.isError === true };
+        const raw = rawText(result);
+        return { text: toModelText(raw), raw, isError: result.isError === true };
       } catch (error) {
         if (signal.aborted) throw error;
-        return {
-          text: `The tool call failed: ${error instanceof Error ? stripLinks(error.message) : "unknown error"}`,
-          isError: true,
-        };
+        const text = `The tool call failed: ${error instanceof Error ? stripLinks(error.message) : "unknown error"}`;
+        return { text, raw: text, isError: true };
       }
     },
     close: () => client.close(),

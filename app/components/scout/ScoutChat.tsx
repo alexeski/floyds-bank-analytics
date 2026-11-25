@@ -1,9 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { CloseIcon, SendIcon, SparkleIcon } from "../icons";
+import { CloseIcon, CollapseIcon, ExpandIcon, NewChatIcon, SendIcon, SparkleIcon } from "../icons";
 import { useScout, type ScoutStatus } from "./ScoutProvider";
 import Markdown from "./Markdown";
+
+// The embed SDK only runs in the browser, and only loads once a chart arrives.
+const ScoutAnswerChart = dynamic(() => import("./ScoutAnswerChart"), { ssr: false });
 
 const STARTERS = [
   "How did customer deposits change this quarter?",
@@ -14,10 +18,15 @@ const STARTERS = [
 /** Elements marked with this attribute open or toggle the chat themselves. */
 const TRIGGER_SELECTOR = "[data-scout-trigger]";
 
+/**
+ * Scout's chat, as a drawer on the right of the screen. It stays mounted when
+ * closed, so its charts don't reload, and can widen for charts.
+ */
 export default function ScoutChat() {
-  const { isOpen, isThinking, status, messages, closeChat, ask } = useScout();
+  const { isOpen, isThinking, status, messages, closeChat, ask, newChat } = useScout();
   const [draft, setDraft] = useState("");
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const [wide, setWide] = useState(false);
+  const panelRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +39,7 @@ export default function ScoutChat() {
     }
     function onPointerDown(event: PointerEvent) {
       const target = event.target as Element | null;
-      if (!target || dialogRef.current?.contains(target)) return;
+      if (!target || panelRef.current?.contains(target)) return;
       if (target.closest(TRIGGER_SELECTOR)) return;
       closeChat();
     }
@@ -46,8 +55,6 @@ export default function ScoutChat() {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [messages, status]);
 
-  if (!isOpen) return null;
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const question = draft;
@@ -55,15 +62,22 @@ export default function ScoutChat() {
     void ask(question);
   }
 
+  const iconButton =
+    "relative rounded-md p-1.5 text-brand-200 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-40";
+
   return (
-    <div
-      ref={dialogRef}
+    <aside
+      ref={panelRef}
       role="dialog"
       aria-modal="false"
       aria-labelledby="scout-chat-title"
-      className="fixed inset-x-4 bottom-4 z-40 flex max-h-[min(680px,calc(100vh-7rem))] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-2xl shadow-brand-950/25 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[440px]"
+      aria-hidden={!isOpen}
+      inert={!isOpen}
+      className={`fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-line bg-white shadow-2xl shadow-brand-950/20 transition-[translate,width,visibility] duration-300 ease-out ${
+        wide ? "sm:w-[min(960px,72vw)]" : "sm:w-[520px]"
+      } ${isOpen ? "visible translate-x-0" : "invisible translate-x-full"}`}
     >
-      <div className="relative flex items-center gap-3 overflow-hidden bg-brand-900 px-4 py-3.5 text-white">
+      <div className="relative flex shrink-0 items-center gap-3 overflow-hidden bg-brand-900 px-4 py-3.5 text-white sm:px-5">
         <span
           aria-hidden="true"
           className="pointer-events-none absolute -top-16 -right-10 size-40 rounded-full bg-brand-500/30 blur-2xl"
@@ -82,95 +96,119 @@ export default function ScoutChat() {
         </div>
         <button
           type="button"
+          onClick={newChat}
+          disabled={isThinking || messages.length === 0}
+          aria-label="Start a new chat"
+          title="New chat"
+          className={iconButton}
+        >
+          <NewChatIcon className="size-5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setWide((value) => !value)}
+          aria-label={wide ? "Make the chat narrower" : "Make the chat wider"}
+          aria-pressed={wide}
+          title={wide ? "Narrower" : "Wider"}
+          className={`${iconButton} hidden sm:block`}
+        >
+          {wide ? <CollapseIcon className="size-5" /> : <ExpandIcon className="size-5" />}
+        </button>
+        <button
+          type="button"
           onClick={closeChat}
           aria-label="Close Scout chat"
-          className="relative rounded-md p-1.5 text-brand-200 transition-colors hover:bg-white/10 hover:text-white"
+          title="Close"
+          className={iconButton}
         >
           <CloseIcon className="size-5" />
         </button>
       </div>
 
-      <div className="min-h-56 flex-1 space-y-3 overflow-y-auto bg-surface px-4 py-4">
-        {messages.length === 0 && (
-          <div className="py-4">
-            <p className="text-sm font-semibold text-ink">
-              Hello, I&rsquo;m Scout.
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              Ask me about deposits, cards, lending, customers, and more. Here
-              are a few ideas:
-            </p>
-            <ul className="mt-4 space-y-2">
-              {STARTERS.map((starter) => (
-                <li key={starter}>
-                  <button
-                    type="button"
-                    onClick={() => void ask(starter)}
-                    className="w-full rounded-lg border border-line bg-white px-3 py-2 text-left text-sm text-ink transition-colors hover:border-brand-300 hover:bg-brand-50"
-                  >
-                    {starter}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {messages.map(({ id, role, content, error }) => {
-          if (role === "assistant" && !content) return null;
-          return (
-            <div
-              key={id}
-              className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {role === "user" ? (
-                <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand-700 px-3.5 py-2 text-sm whitespace-pre-wrap text-white">
-                  {content}
-                </p>
-              ) : (
-                <div
-                  className={`max-w-[92%] min-w-0 rounded-2xl rounded-bl-sm border px-3.5 py-2.5 text-sm ${
-                    error
-                      ? "border-red-200 bg-red-50 text-red-900"
-                      : "border-line bg-white text-ink"
-                  }`}
-                >
-                  <Markdown>{content}</Markdown>
-                </div>
-              )}
+      <div className="min-h-0 flex-1 overflow-y-auto bg-surface">
+        <div className="mx-auto max-w-3xl space-y-4 px-4 py-5 sm:px-5">
+          {messages.length === 0 && (
+            <div className="py-6">
+              <p className="text-base font-bold text-ink">Hello, I&rsquo;m Scout.</p>
+              <p className="mt-1 text-sm text-muted">
+                Ask me about deposits, cards, lending, customers, and more. I&rsquo;ll answer
+                with the figures and a chart. Here are a few ideas:
+              </p>
+              <ul className="mt-5 space-y-2">
+                {STARTERS.map((starter) => (
+                  <li key={starter}>
+                    <button
+                      type="button"
+                      onClick={() => void ask(starter)}
+                      className="flex w-full items-center gap-3 rounded-xl border border-line bg-white px-4 py-3 text-left text-sm font-medium text-ink transition-colors hover:border-brand-300 hover:bg-brand-50"
+                    >
+                      <SparkleIcon className="size-4 shrink-0 text-brand-600" />
+                      {starter}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-          );
-        })}
-        {status && <StatusLine status={status} />}
-        <div ref={endRef} />
+          )}
+          {messages.map(({ id, role, content, charts, error }) => {
+            if (role === "user") {
+              return (
+                <div key={id} className="flex justify-end">
+                  <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand-700 px-3.5 py-2 text-sm whitespace-pre-wrap text-white">
+                    {content}
+                  </p>
+                </div>
+              );
+            }
+            if (!content && !charts?.length) return null;
+            return (
+              <div key={id} className="space-y-3">
+                {content && (
+                  <div
+                    className={`w-fit max-w-full min-w-0 rounded-2xl rounded-bl-sm border px-4 py-3 text-sm ${
+                      error ? "border-red-200 bg-red-50 text-red-900" : "border-line bg-white text-ink"
+                    }`}
+                  >
+                    <Markdown>{content}</Markdown>
+                  </div>
+                )}
+                {charts?.map((chart) => (
+                  <ScoutAnswerChart key={chart.messageId} chart={chart} />
+                ))}
+              </div>
+            );
+          })}
+          {status && <StatusLine status={status} />}
+          <div ref={endRef} />
+        </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex items-center gap-2 border-t border-line bg-white p-3"
-      >
-        <label htmlFor="scout-chat-input" className="sr-only">
-          Ask Scout a question
-        </label>
-        <input
-          ref={inputRef}
-          id="scout-chat-input"
-          type="text"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="Ask a question…"
-          autoComplete="off"
-          className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none placeholder:text-muted focus:border-brand-600 focus:bg-white"
-        />
-        <button
-          type="submit"
-          disabled={!draft.trim() || isThinking}
-          aria-label="Send question"
-          className="rounded-lg bg-brand-700 p-3 text-white transition-colors hover:bg-brand-800 disabled:opacity-40"
-        >
-          <SendIcon className="size-4" />
-        </button>
+      <form onSubmit={handleSubmit} className="shrink-0 border-t border-line bg-white p-3 sm:p-4">
+        <div className="mx-auto flex max-w-3xl items-center gap-2">
+          <label htmlFor="scout-chat-input" className="sr-only">
+            Ask Scout a question
+          </label>
+          <input
+            ref={inputRef}
+            id="scout-chat-input"
+            type="text"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Ask a question…"
+            autoComplete="off"
+            className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm outline-none placeholder:text-muted focus:border-brand-600 focus:bg-white"
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim() || isThinking}
+            aria-label="Send question"
+            className="rounded-lg bg-brand-700 p-3 text-white transition-colors hover:bg-brand-800 disabled:opacity-40"
+          >
+            <SendIcon className="size-4" />
+          </button>
+        </div>
       </form>
-    </div>
+    </aside>
   );
 }
 

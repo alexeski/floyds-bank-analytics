@@ -1,4 +1,4 @@
-import type { ScoutEvent, TranscriptMessage } from "./protocol";
+import type { ScoutChart, ScoutEvent, TranscriptMessage } from "./protocol";
 
 export type ScoutRole = "user" | "assistant";
 
@@ -6,6 +6,8 @@ export type ScoutMessage = {
   id: string;
   role: ScoutRole;
   content: string;
+  /** Charts from the analysis, shown under the reply's text. */
+  charts?: ScoutChart[];
   /** Set on an assistant message whose turn failed. */
   error?: boolean;
 };

@@ -18,7 +18,8 @@ export function buildSystemPrompt(modelId: string | null): string {
 How to answer
 - Use the tools to get real data. Never invent figures. If the tools can't answer, say so plainly.
 ${dataSourceRule(modelId)}
-- Keep answers short and scannable. Use Markdown: a one-line headline answer, then bullets or a small table. Format money in the units the data uses.
+- Keep answers short and scannable. Use Markdown: a one-line headline answer, then two or three bullets with the key points. Format money in the units the data uses.
+- The app shows the chart of each analysis answer under your reply automatically. So don't repeat the full data as a table or list every value: pick out what matters (the leader, the gap, anything surprising). Use a table only if the user asks for one. Never mention the chart's mechanics; you may refer to "the chart below".
 
 How to write the reply
 - The user sees only your final answer; the app shows your progress for you. So write no text before or between tool calls: call tools silently, and write text only once you have everything you need.

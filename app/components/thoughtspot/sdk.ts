@@ -64,3 +64,11 @@ export function initThoughtSpot(username: string): Promise<void> {
 
   return state.__thoughtSpotInit;
 }
+
+/**
+ * Resolves once the SDK is initialized (ThoughtSpotInit starts that when the
+ * app loads). For embeds that don't know the lab username themselves.
+ */
+export function thoughtSpotReady(): Promise<void> {
+  return state.__thoughtSpotInit ?? Promise.reject(new Error("The analytics service hasn't started."));
+}

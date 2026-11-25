@@ -27,6 +27,8 @@ type ScoutContextValue = {
   openChat: () => void;
   closeChat: () => void;
   ask: (question: string) => Promise<void>;
+  /** Clears the conversation, unless Scout is still answering. */
+  newChat: () => void;
 };
 
 const ScoutContext = createContext<ScoutContextValue | null>(null);
@@ -83,6 +85,12 @@ export default function ScoutProvider({ children }: { children: ReactNode }) {
           case "discard":
             updateReply((message) => ({ ...message, content: "" }));
             break;
+          case "chart":
+            updateReply((message) => ({
+              ...message,
+              charts: [...(message.charts ?? []), event.chart],
+            }));
+            break;
           case "done":
             transcriptRef.current = event.transcript;
             break;
@@ -109,6 +117,12 @@ export default function ScoutProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const newChat = useCallback(() => {
+    if (busyRef.current) return;
+    transcriptRef.current = [];
+    setMessages([]);
+  }, []);
+
   const value = useMemo(
     () => ({
       isOpen,
@@ -118,8 +132,9 @@ export default function ScoutProvider({ children }: { children: ReactNode }) {
       openChat,
       closeChat,
       ask,
+      newChat,
     }),
-    [isOpen, status, messages, openChat, closeChat, ask],
+    [isOpen, status, messages, openChat, closeChat, ask, newChat],
   );
 
   return (

@@ -26,6 +26,21 @@ export type ScoutRequest = {
   transcript: TranscriptMessage[];
 };
 
+/**
+ * A chart from the analysis service, identified only by IDs: the browser
+ * embeds it with the Visual Embed SDK, so no link is ever sent or shown.
+ */
+export type ScoutChart = {
+  title: string;
+  worksheetId: string;
+  sessionId: string;
+  genNo: number;
+  acSessionId: string;
+  acGenNo: number;
+  convId: string;
+  messageId: string;
+};
+
 export type ScoutEvent =
   /** What Scout is doing right now, for the status line. */
   | { type: "status"; label: string }
@@ -36,6 +51,8 @@ export type ScoutEvent =
    * a tool, so it was narration ("Let me look that up"), not the answer.
    */
   | { type: "discard" }
+  /** A chart to show with this reply, under its text. */
+  | { type: "chart"; chart: ScoutChart }
   /** The turn finished. `transcript` replaces the browser's copy. */
   | { type: "done"; transcript: TranscriptMessage[] }
   /** The turn failed. The message is safe to show to the user. */

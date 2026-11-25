@@ -1,7 +1,12 @@
 import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
-import type { ScoutEvent, TranscriptBlock, TranscriptMessage } from "@/app/components/scout/protocol";
+import type {
+  ScoutChart,
+  ScoutEvent,
+  TranscriptBlock,
+  TranscriptMessage,
+} from "@/app/components/scout/protocol";
 import { getThoughtSpotToken } from "@/lib/thoughtspot/token-service";
 import { readScoutConfig } from "./config";
 import { openMcpSession, type McpSession } from "./mcp";
@@ -23,18 +28,68 @@ const TOOL_LABELS: Record<string, string> = {
   get_dashboard_status: "Building the Liveboard",
 };
 
+type SessionUpdate = {
+  type?: string;
+  text?: string;
+  is_thinking?: boolean;
+  answer_id?: string;
+  answer_title?: string;
+  answer_data_source_id?: string;
+  iframe_url?: string;
+};
+
+/** IDs pass to the browser only if they look like IDs. */
+const SAFE_ID = /^[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * Turns a finished analysis answer into the IDs the SDK's ConversationMessage
+ * embed needs. The answer's iframe_url carries the embed's session IDs; only
+ * those IDs are kept, never the URL, and only for this ThoughtSpot host.
+ */
+function toChart(update: SessionUpdate, thoughtSpotHost: string): ScoutChart | null {
+  if (update.type !== "answer" || update.is_thinking !== false) return null;
+  if (!update.iframe_url || !update.answer_id || !update.answer_data_source_id) return null;
+  try {
+    const url = new URL(update.iframe_url);
+    if (url.host !== thoughtSpotHost) return null;
+    const hash = url.hash.replace(/^#/, "");
+    const params = new URLSearchParams(hash.slice(hash.indexOf("?") + 1));
+    const answer = JSON.parse(update.answer_id) as {
+      conversation_id?: string;
+      message_id?: string;
+    };
+    const chart: ScoutChart = {
+      title: (update.answer_title ?? "").slice(0, 200),
+      worksheetId: update.answer_data_source_id,
+      sessionId: params.get("sessionId") ?? "",
+      genNo: Number(params.get("genNo")),
+      acSessionId: params.get("acSessionId") ?? "",
+      acGenNo: Number(params.get("acGenNo")),
+      convId: answer.conversation_id ?? "",
+      messageId: answer.message_id ?? "",
+    };
+    const ids = [chart.worksheetId, chart.sessionId, chart.acSessionId, chart.convId, chart.messageId];
+    if (!ids.every((id) => SAFE_ID.test(id))) return null;
+    if (!Number.isInteger(chart.genNo) || !Number.isInteger(chart.acGenNo)) return null;
+    return chart;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Reads a get_session_updates result for the analysis's latest progress note
- * ("Looking at Customer Region, Savings Growth") and whether it has finished,
- * so the status line can show real progress instead of the reply narrating it.
+ * ("Looking at Customer Region, Savings Growth"), whether it has finished, and
+ * any finished answers that come with a chart.
  */
-function readAnalysisProgress(text: string): { note: string | null; done: boolean } {
+function readAnalysisUpdates(
+  raw: string,
+  thoughtSpotHost: string,
+): { note: string | null; done: boolean; charts: ScoutChart[] } {
   try {
-    const result = JSON.parse(text) as {
-      is_done?: boolean;
-      session_updates?: { type?: string; text?: string }[];
-    };
-    const notes = (result.session_updates ?? [])
+    const result = JSON.parse(raw) as { is_done?: boolean; session_updates?: SessionUpdate[] };
+    const updates = result.session_updates ?? [];
+    const notes = updates
       .filter((update) => update.type === "step_notification" && update.text?.trim())
       .map((update) => update.text!.trim());
     const note = notes.at(-1) ?? null;
@@ -42,11 +97,17 @@ function readAnalysisProgress(text: string): { note: string | null; done: boolea
       // Keep the product's own name out of the status line (white label).
       note: note && !/thoughtspot|spotter/i.test(note) ? note.slice(0, 120) : null,
       done: result.is_done === true,
+      charts: updates
+        .map((update) => toChart(update, thoughtSpotHost))
+        .filter((chart): chart is ScoutChart => chart !== null),
     };
   } catch {
-    return { note: null, done: false };
+    return { note: null, done: false, charts: [] };
   }
 }
+
+/** At most this many charts per reply. */
+const MAX_CHARTS = 3;
 
 /** The Banking model's ID, looked up once per server process. */
 let cachedModelId: string | null = null;
@@ -126,6 +187,7 @@ export async function runScoutTurn({
     }));
 
     const system = buildSystemPrompt(await findDataModelId(mcp, signal));
+    const shownCharts = new Set<string>();
 
     const messages: TranscriptMessage[] = [
       ...transcript,
@@ -205,7 +267,12 @@ export async function runScoutTurn({
         );
         if (outcome.isError) log(`tool ${block.name} returned an error`);
         if (block.name === "get_session_updates" && !outcome.isError) {
-          const progress = readAnalysisProgress(outcome.text);
+          const progress = readAnalysisUpdates(outcome.raw, config.thoughtSpotHost);
+          for (const chart of progress.charts) {
+            if (shownCharts.has(chart.messageId) || shownCharts.size >= MAX_CHARTS) continue;
+            shownCharts.add(chart.messageId);
+            emit({ type: "chart", chart });
+          }
           if (progress.done) thinkingLabel = "Writing the answer";
           else if (progress.note) thinkingLabel = progress.note;
           emit({ type: "status", label: thinkingLabel });

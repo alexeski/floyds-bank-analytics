@@ -58,10 +58,10 @@ export default function SiteHeader() {
           })}
         </nav>
         <div className="ml-auto flex shrink-0 items-center gap-3">
-          <ScoutButton />
-          <span aria-hidden="true" className="hidden h-7 w-px bg-line md:block" />
           <AccountMenu />
         </div>
+        {/* Floats at the bottom right of the screen (rendered in a portal). */}
+        <ScoutButton />
       </div>
     </header>
   );
