@@ -18,6 +18,19 @@ and add it to the system prompt so the model includes one in the request.
 
 UX: stream text; status line with elapsed time (connecting, thinking, each tool,
 MCP progress). Logging: tool name, only — tell me where logs land.
+Clean replies: the chat bubble shows only the final answer, never the model's process.
+In the system prompt, tell the model to write no text before or between tool calls (no
+"Let me…", "I'll analyze…", "Perfect!", no talk of sessions, searches or data sources),
+to open with the headline answer, and to add no preamble or closing offer. As a backstop,
+when a model step that streamed text ends in tool calls, take that text back out of the
+bubble (a "discard" event) and leave it out of the transcript. Show progress in the status
+line instead, including the step_notification notes in get_session_updates results.
+Data source: always the model named "Banking"; Scout must never discover or choose one.
+On the server, look up its ID once with search_objects (query "Banking", types ["WORKSHEET"],
+exact title match), cache it, and put it in the system prompt with the rule: call
+create_analysis_session with that data_source_id straight away, never search for a data
+source, and reuse the session for follow-ups. If the lookup fails, fall back to telling the
+model to make that one exact search itself. A session without data_source_id fails here.
 Cache Components is on: never call Date.now() / new Date() / Math.random() during render
 or in a useState initializer. Record start times in event handlers or useEffect, and
 time with performance.now(). Don't run `next build` to check this.
@@ -35,6 +48,7 @@ sanitized, with no raw HTML. Close the chat when I click outside it.
 
 Testing, keep it minimal: run typecheck and lint, then ONE Node script (fetch, no browser,
 no Playwright or other headless browser) against {{DEV_URL}} that sends a simple question to
-/api/scout and checks that it streams a reply. Don't create liveboards as a test.
+/api/scout and checks that it streams a reply, and that the reply shown (after any discard)
+has no narration such as "Let me" or "I'll". Don't create liveboards as a test.
 
 Don't commit.

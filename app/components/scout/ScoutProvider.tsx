@@ -80,6 +80,9 @@ export default function ScoutProvider({ children }: { children: ReactNode }) {
           case "text":
             updateReply((message) => ({ ...message, content: message.content + event.delta }));
             break;
+          case "discard":
+            updateReply((message) => ({ ...message, content: "" }));
+            break;
           case "done":
             transcriptRef.current = event.transcript;
             break;

@@ -31,6 +31,11 @@ export type ScoutEvent =
   | { type: "status"; label: string }
   /** A chunk of the assistant's reply. */
   | { type: "text"; delta: string }
+  /**
+   * Remove the reply text streamed so far: the model wrote it before calling
+   * a tool, so it was narration ("Let me look that up"), not the answer.
+   */
+  | { type: "discard" }
   /** The turn finished. `transcript` replaces the browser's copy. */
   | { type: "done"; transcript: TranscriptMessage[] }
   /** The turn failed. The message is safe to show to the user. */
