@@ -18,6 +18,8 @@ type ScoutContextValue = {
   openChat: () => void;
   closeChat: () => void;
   ask: (question: string) => Promise<void>;
+  /** Clears the conversation, unless Scout is still answering. */
+  newChat: () => void;
 };
 
 const ScoutContext = createContext<ScoutContextValue | null>(null);
@@ -64,9 +66,13 @@ export default function ScoutProvider({ children }: { children: ReactNode }) {
     [messages],
   );
 
+  const newChat = useCallback(() => {
+    if (!isThinking) setMessages([]);
+  }, [isThinking]);
+
   const value = useMemo(
-    () => ({ isOpen, isThinking, messages, openChat, closeChat, ask }),
-    [isOpen, isThinking, messages, openChat, closeChat, ask],
+    () => ({ isOpen, isThinking, messages, openChat, closeChat, ask, newChat }),
+    [isOpen, isThinking, messages, openChat, closeChat, ask, newChat],
   );
 
   return (

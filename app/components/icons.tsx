@@ -255,3 +255,28 @@ export function BoltIcon(props: IconProps) {
     </Icon>
   );
 }
+
+export function ExpandIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" />
+    </Icon>
+  );
+}
+
+export function CollapseIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M20 10h-6V4M4 14h6v6M14 10l7-7M10 14l-7 7" />
+    </Icon>
+  );
+}
+
+export function NewChatIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6" />
+      <path d="M17.5 3.5a2.1 2.1 0 0 1 3 3L13 14l-4 1 1-4 7.5-7.5Z" />
+    </Icon>
+  );
+}
