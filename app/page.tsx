@@ -271,7 +271,7 @@ export default function LandingPage() {
               Ready to see the whole picture?
             </h2>
             <p className="mt-2 text-brand-100">
-              Log on with your {BANK_NAME} colleague ID.
+              Log on with your work email.
             </p>
           </div>
           <Link

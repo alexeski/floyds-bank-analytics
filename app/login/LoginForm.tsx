@@ -2,13 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { DEMO_USER } from "../components/brand";
 import { LockIcon } from "../components/icons";
 
-const DEMO_USER_ID = "lab.analyst";
+/** Shown as dots in the password field. Not a real password, and never sent. */
+const DEMO_PASSWORD = "demo-password";
 
 /**
- * Demo log-on form. Nothing is sent anywhere: submitting simply opens the
- * portal, so attendees can start the lab without real credentials.
+ * Demo log-on form, prefilled with the demo user's email and a dummy
+ * password. Nothing is sent anywhere: submitting simply opens the portal.
+ * The app signs in to the analytics service separately, with trusted auth.
  */
 export default function LoginForm() {
   const router = useRouter();
@@ -23,32 +26,29 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-5">
       <div>
-        <label htmlFor="user-id" className="block text-sm font-bold text-ink">
-          User ID
+        <label htmlFor="email" className="block text-sm font-bold text-ink">
+          Work email
         </label>
         <input
-          id="user-id"
-          name="user-id"
-          type="text"
+          id="email"
+          name="email"
+          type="email"
           autoComplete="off"
-          defaultValue={DEMO_USER_ID}
+          defaultValue={DEMO_USER.email}
           className="mt-1.5 block w-full rounded-md border border-[#8a948f] bg-white px-3.5 py-3 text-[15px] text-ink outline-none transition-shadow focus:border-brand-700 focus:ring-3 focus:ring-brand-500/25"
         />
       </div>
       <div>
-        <div className="flex items-baseline justify-between">
-          <label htmlFor="password" className="block text-sm font-bold text-ink">
-            Password
-          </label>
-          <span className="text-xs text-muted">Optional in the demo</span>
-        </div>
+        <label htmlFor="password" className="block text-sm font-bold text-ink">
+          Password
+        </label>
         <input
           id="password"
           name="password"
           type="password"
           autoComplete="off"
-          placeholder="Leave blank"
-          className="mt-1.5 block w-full rounded-md border border-[#8a948f] bg-white px-3.5 py-3 text-[15px] text-ink outline-none transition-shadow placeholder:text-muted/70 focus:border-brand-700 focus:ring-3 focus:ring-brand-500/25"
+          defaultValue={DEMO_PASSWORD}
+          className="mt-1.5 block w-full rounded-md border border-[#8a948f] bg-white px-3.5 py-3 text-[15px] text-ink outline-none transition-shadow focus:border-brand-700 focus:ring-3 focus:ring-brand-500/25"
         />
       </div>
       <label className="flex items-center gap-2.5 text-sm text-ink">
@@ -57,7 +57,7 @@ export default function LoginForm() {
           defaultChecked
           className="size-4 rounded accent-brand-700"
         />
-        Remember my user ID
+        Remember me
       </label>
       <button
         type="submit"
