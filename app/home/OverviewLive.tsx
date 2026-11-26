@@ -19,6 +19,7 @@ import { AlertIcon, ArrowRightIcon, ArrowUpRightIcon, TrendDownIcon, TrendUpIcon
 import { AgeColumns, ProductBars } from "./BreakdownCharts";
 import OverviewSpec from "./OverviewSpec";
 import RegionChart from "./RegionChart";
+import SignalsAndLinks from "./SignalsAndLinks";
 
 const PERIOD_MONTHS: Record<string, number> = { "3m": 3, "6m": 6, "12m": 12 };
 
@@ -44,12 +45,15 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
   } catch (error) {
     console.error("[overview] data load failed:", error instanceof Error ? error.message : "unknown");
     return (
-      <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-900">
-        <AlertIcon className="mt-0.5 size-5 shrink-0" />
-        <div>
-          <p className="font-bold">We couldn&rsquo;t load live figures.</p>
-          <p className="mt-1">Check the analytics settings in .env.local, then refresh the page.</p>
+      <div className="space-y-6">
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-900">
+          <AlertIcon className="mt-0.5 size-5 shrink-0" />
+          <div>
+            <p className="font-bold">We couldn&rsquo;t load live figures.</p>
+            <p className="mt-1">Check the analytics settings in .env.local, then refresh the page.</p>
+          </div>
         </div>
+        <SignalsAndLinks signals={[]} />
       </div>
     );
   }
@@ -62,7 +66,14 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
   const periodText = `${months} months`;
 
   // Until the data layer is connected, the page shows the design spec.
-  if (data.source === "placeholder") return <OverviewSpec />;
+  if (data.source === "placeholder") {
+    return (
+      <div className="space-y-6">
+        <OverviewSpec />
+        <SignalsAndLinks signals={null} />
+      </div>
+    );
+  }
 
   const deposits = range.map((m) => m.checking + m.savings);
   const t = data.totals;
@@ -269,6 +280,8 @@ export default async function OverviewLive({ searchParams }: { searchParams: Par
           />
         </ul>
       </section>
+
+      <SignalsAndLinks signals={data.signals ?? []} />
     </div>
   );
 }

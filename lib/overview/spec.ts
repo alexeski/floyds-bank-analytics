@@ -148,5 +148,90 @@ export const LOB_ROWS: { id: string; line: string; customers: string; metric: st
   { id: "LOB-06", line: "Customer base", customers: "All customers", metric: "Average credit score", footer: "Products per customer" },
 ];
 
+/**
+ * The Signals list: four notable movements worked out from the figures the
+ * page already loads (no extra queries), each with a follow-up question for
+ * Scout. Text in {braces} is filled from the data. Money uses money(), counts
+ * use count(), and percentages have one decimal (lib/overview/format.ts).
+ * "12 months" means the first and last of the latest 12 monthly points.
+ */
+export type SignalSpec = {
+  id: string;
+  /** What the signal watches. */
+  name: string;
+  /** The `area` label shown on the right. */
+  area: string;
+  /** The title, as a template. */
+  title: string;
+  /** The detail line, as a template. */
+  detail: string;
+  /** How to pick the tone: good, warning, or critical. */
+  tone: string;
+  /** Which OverviewData fields it reads. */
+  data: string;
+  /** Whether the region filter applies. */
+  regionFilter: boolean;
+  /** The question "Ask Scout why" sends, as a template. */
+  question: string;
+};
+
+export const SIGNALS_SPEC: WidgetSpec = {
+  id: "SIG-01–04",
+  title: "Signals",
+  kind: "cards",
+  question: "What changed that someone should look at, and why?",
+  data: ["Four signals worked out from the figures above: no extra queries", "Each one hands Scout a follow-up question"],
+  slice: "Latest 12 months · newest figures",
+  regionFilter: true,
+  note: "SIG-04 compares regions, so it always covers all five. Keep the four in this order.",
+};
+
+export const SIGNAL_SPECS: SignalSpec[] = [
+  {
+    id: "SIG-01",
+    name: "Credit risk",
+    area: "Credit",
+    title: "{count} customers rated {Lowest rating}",
+    detail: "{share}% of the customer base sits in the lowest credit rating.",
+    tone: "critical at 5% or more, warning from 2%, good below 2%",
+    data: "creditRatings[0] (lowest rating, title case) ÷ totals.customers",
+    regionFilter: true,
+    question: "How many customers have a {Lowest rating} credit rating, by customer region and age group?",
+  },
+  {
+    id: "SIG-02",
+    name: "Current account momentum",
+    area: "Current accounts",
+    title: "Checking balances flat over 12 months (within ±2%), else “Checking balances up|down {x}% in 12 months”",
+    detail: "“Up|Down {x}% while savings grew|fell {y}%.”, adding “ Cash is moving into savings.” when savings grew 5 points more",
+    tone: "good when up 2% or more, otherwise warning",
+    data: "monthly: checking and savings, first vs last of 12 months",
+    regionFilter: true,
+    question: "How did total checking and savings balances change month by month over the last 12 months?",
+  },
+  {
+    id: "SIG-03",
+    name: "Fastest-growing balance",
+    area: "Savings, Current accounts or Cards (the winner's)",
+    title: "{Type} balances up|down {x}% in 12 months",
+    detail: "The fastest-growing balance type, ahead of {other} ({±a}%) and {other} ({±b}%).",
+    tone: "good when it grew, warning when even the best fell",
+    data: "monthly: savings, checking, cards; the largest 12-month change wins",
+    regionFilter: true,
+    question: "Which customer age groups grew their {type} balances the most over the last 12 months?",
+  },
+  {
+    id: "SIG-04",
+    name: "Deposit concentration",
+    area: "Regions",
+    title: "{Region} holds the most deposits: {money}",
+    detail: "{ratio} times the {smallest region} ({money}), the smallest region.",
+    tone: "always good",
+    data: "regions: checking + savings per region (ratio with one decimal)",
+    regionFilter: false,
+    question: "Compare total checking and savings balances by customer region.",
+  },
+];
+
 /** Every widget ID in the spec, in page order. */
-export const SPEC_COUNT = KPI_SPECS.length + CHART_SPECS.length + LOB_ROWS.length;
+export const SPEC_COUNT = KPI_SPECS.length + CHART_SPECS.length + LOB_ROWS.length + SIGNAL_SPECS.length;
