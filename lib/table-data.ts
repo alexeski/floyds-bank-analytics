@@ -2,7 +2,9 @@
  * Thin adapter around tse-data-classes that turns any data payload from an
  * embedded visualization into a capped table for the "View as table" dialog.
  * The package does the parsing; this module only applies the rules the
- * dialog needs: usable-or-reject, the row cap, and date buckets.
+ * dialog needs: usable-or-reject, the row cap, and dates. The package drops
+ * column types, so dates are found from the source's own column metadata
+ * (dataType and timeBucket) and shown at the right grain (Dec 2025, Q4 2025).
  *
  * Isomorphic (no browser or server APIs) so a Node script can test it.
  */
@@ -28,12 +30,17 @@ export const FETCH_ROWS = MAX_ROWS + 1;
 
 export type TableCell = string | number | boolean | null;
 
+/** How finely a date column is shown, from its ThoughtSpot time bucket. */
+export type DateGrain = "datetime" | "day" | "week" | "month" | "quarter" | "year";
+
 export type TableColumn = {
   name: string;
   /** Every non-empty value is a number: right-align it. */
   numeric: boolean;
-  /** Values were ThoughtSpot date buckets, now epoch milliseconds: format as dates in UTC. */
+  /** Values are dates, stored as epoch milliseconds: format them in UTC. */
   date: boolean;
+  /** For date columns: the grain to show them at. */
+  grain?: DateGrain;
 };
 
 export type TableResult = {
@@ -44,6 +51,65 @@ export type TableResult = {
 };
 
 export type SortDirection = "asc" | "desc";
+
+/** What a source says about one column: its data type and time bucket. */
+type ColumnMeta = { dataType?: string; timeBucket?: string };
+
+/**
+ * Reads column metadata from an embedAnswerData or fetchData `columns` array,
+ * whose entries are { column: { name, dataType, timeBucket } }. Keyed by
+ * lower-cased name, the way the package matches column names.
+ */
+function columnMetaFrom(columns: unknown): Map<string, ColumnMeta> {
+  const meta = new Map<string, ColumnMeta>();
+  if (!Array.isArray(columns)) return meta;
+  for (const entry of columns) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const column = ((entry as { column?: unknown }).column ?? entry) as Record<string, unknown>;
+    if (typeof column.name !== "string") continue;
+    meta.set(column.name.toLowerCase(), {
+      dataType: typeof column.dataType === "string" ? column.dataType : undefined,
+      timeBucket: typeof column.timeBucket === "string" ? column.timeBucket : undefined,
+    });
+  }
+  return meta;
+}
+
+const BUCKET_GRAIN: Record<string, DateGrain> = {
+  HOURLY: "datetime",
+  DAILY: "day",
+  WEEKLY: "week",
+  MONTHLY: "month",
+  QUARTERLY: "quarter",
+  YEARLY: "year",
+};
+
+/**
+ * The grain for a column the source typed. Buckets like MONTH_OF_YEAR or
+ * DAY_OF_WEEK are small numbers, not timestamps, so they aren't dates here.
+ */
+function grainFromMeta({ dataType, timeBucket }: ColumnMeta): DateGrain | null {
+  if (timeBucket && BUCKET_GRAIN[timeBucket]) return BUCKET_GRAIN[timeBucket];
+  if (timeBucket && timeBucket !== "NO_BUCKET" && timeBucket !== "AUTO") return null;
+  if (dataType === "DATE") return "day";
+  if (dataType === "DATE_TIME") return "datetime";
+  return null;
+}
+
+/**
+ * The grain for an untyped column (the REST fallback has names only), from
+ * ThoughtSpot's bucketed column names such as "Month(Statement Date)".
+ */
+function grainFromName(name: string): DateGrain | null {
+  const bucket = /^(hour|day|week|month|quarter|year)(?:ly)?\s*\(/i.exec(name.trim())?.[1]?.toLowerCase();
+  if (!bucket) return null;
+  return bucket === "hour" ? "datetime" : (bucket as DateGrain);
+}
+
+/** Epoch seconds between 1973 and 2286: a timestamp, not a count or an ID-like small number. */
+function isEpochSeconds(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 1e8 && value < 1e10;
+}
 
 /** A date bucket cell, shaped { v: { s: <epoch seconds> } }. */
 function dateBucketSeconds(value: unknown): number | null {
@@ -71,9 +137,14 @@ function logIssues(source: string, data: { errors: readonly string[]; warnings: 
 
 /**
  * Converts a parsed TabularData into the dialog's table, or returns null when
- * it isn't usable (invalid or no rows).
+ * it isn't usable (invalid or no rows). `meta` is the source's column
+ * metadata, when it has any, used to find date columns.
  */
-export function toTable(data: TabularData | undefined, source: string): TableResult | null {
+export function toTable(
+  data: TabularData | undefined,
+  source: string,
+  meta: Map<string, ColumnMeta> = new Map(),
+): TableResult | null {
   if (!data) return null;
   logIssues(source, data);
   if (!data.isValid || data.nbrRows === 0) return null;
@@ -85,10 +156,19 @@ export function toTable(data: TabularData | undefined, source: string): TableRes
 
   const columns: TableColumn[] = names.map((name) => {
     const values = raw.map((row) => row[name]).filter((v) => v !== null && v !== undefined);
-    const date = values.length > 0 && values.every((v) => dateBucketSeconds(v) !== null);
+    const typed = meta.get(name.toLowerCase());
+    const grainHint = typed ? grainFromMeta(typed) : grainFromName(name);
+    let grain: DateGrain | null = null;
+    if (values.length > 0 && values.every((v) => dateBucketSeconds(v) !== null)) {
+      grain = grainHint ?? "day";
+    } else if (grainHint && values.length > 0 && values.every(isEpochSeconds)) {
+      // Typed or bucketed date columns arrive as plain epoch seconds.
+      grain = grainHint;
+    }
+    const date = grain !== null;
     const numeric =
       !date && values.length > 0 && values.every((v) => typeof v === "number" && Number.isFinite(v));
-    return { name, numeric, date };
+    return date ? { name, numeric, date, grain: grain! } : { name, numeric, date };
   });
 
   const rows = raw.map((row) => {
@@ -96,7 +176,7 @@ export function toTable(data: TabularData | undefined, source: string): TableRes
     for (const column of columns) {
       const value = row[column.name];
       if (column.date) {
-        const seconds = dateBucketSeconds(value);
+        const seconds = isEpochSeconds(value) ? value : dateBucketSeconds(value);
         out[column.name] = seconds === null ? null : seconds * 1000;
       } else {
         out[column.name] = toCell(value);
@@ -123,11 +203,16 @@ export function toTable(data: TabularData | undefined, source: string): TableRes
  */
 export function tableFromEmbedAnswerData(payload: unknown): TableResult | null {
   const p = (typeof payload === "object" && payload !== null ? payload : {}) as {
-    embedAnswerData?: unknown;
-    data?: { embedAnswerData?: unknown } | null;
+    embedAnswerData?: object;
+    data?: { embedAnswerData?: object } | null;
   };
-  if (!p.embedAnswerData && !p.data?.embedAnswerData) return null;
-  return toTable(ActionData.createFromJSON(payload as Parameters<typeof ActionData.createFromJSON>[0]), "embedAnswerData");
+  const embedAnswerData = p.embedAnswerData ?? p.data?.embedAnswerData;
+  if (!embedAnswerData) return null;
+  return toTable(
+    ActionData.createFromJSON(payload as Parameters<typeof ActionData.createFromJSON>[0]),
+    "embedAnswerData",
+    columnMetaFrom((embedAnswerData as { columns?: unknown }).columns),
+  );
 }
 
 /**
@@ -141,10 +226,12 @@ export function tableFromAnswerService(result: unknown): TableResult | null {
     return toTable(AnswerData.createFromJSON(result as Parameters<typeof AnswerData.createFromJSON>[0]), "answerService");
   }
   const wrapped = { embedAnswerData: result };
-  if (!Array.isArray((result as { columns?: unknown }).columns)) return null;
+  const { columns } = result as { columns?: unknown };
+  if (!Array.isArray(columns)) return null;
   return toTable(
     ActionData.createFromJSON(wrapped as Parameters<typeof ActionData.createFromJSON>[0]),
     "answerService",
+    columnMetaFrom(columns),
   );
 }
 
@@ -174,7 +261,9 @@ export function tableFromUnknown(payload: unknown): TableResult | null {
     console.warn("[table-data] unrecognized payload shape");
     return null;
   }
-  return isTabularData(data) ? toTable(data, "unknown payload") : null;
+  const p = payload as { columns?: unknown; embedAnswerData?: { columns?: unknown } };
+  const meta = columnMetaFrom(p.embedAnswerData?.columns ?? p.columns);
+  return isTabularData(data) ? toTable(data, "unknown payload", meta) : null;
 }
 
 /** Sorts a copy of the rows: numeric-aware, empty values last in both directions. */
@@ -186,18 +275,46 @@ export function sortRows(
   return sortObjects([...rows], column, direction);
 }
 
-const DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
+const DAY = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
   month: "short",
   year: "numeric",
   timeZone: "UTC",
 });
+const DAY_TIME = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
+const MONTH = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
 const NUMBER_FORMAT = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
 
-/** Formats a cell for display. Date-bucket columns are formatted in UTC. */
+/** Formats epoch milliseconds at a column's grain, in UTC (ThoughtSpot's buckets are UTC). */
+function formatDate(ms: number, grain: DateGrain = "day"): string {
+  const date = new Date(ms);
+  switch (grain) {
+    case "datetime":
+      return DAY_TIME.format(date);
+    case "week":
+      return `Week of ${DAY.format(date)}`;
+    case "month":
+      return MONTH.format(date);
+    case "quarter":
+      return `Q${Math.floor(date.getUTCMonth() / 3) + 1} ${date.getUTCFullYear()}`;
+    case "year":
+      return String(date.getUTCFullYear());
+    default:
+      return DAY.format(date);
+  }
+}
+
+/** Formats a cell for display. Date columns are formatted in UTC at their grain. */
 export function formatCell(value: TableCell, column: TableColumn): string {
   if (value === null) return "";
-  if (column.date && typeof value === "number") return DATE_FORMAT.format(value);
+  if (column.date && typeof value === "number") return formatDate(value, column.grain);
   if (typeof value === "number") return NUMBER_FORMAT.format(value);
   return String(value);
 }

@@ -68,6 +68,67 @@ const tests = {
     assert.equal(formatCell(t.rows[0].Month, month), "01 Jan 2026");
     assert.equal(t.rows[2].Month, null);
   },
+  "typed date columns (plain epoch seconds) are shown at their time bucket"() {
+    // The real shape: dates arrive as INT64 epoch seconds; only the column metadata says they're dates.
+    const col = (id, name, dataType, timeBucket) => ({ column: { id, name, dataType, timeBucket } });
+    const typed = [
+      col("m", "Month(Statement Date)", "DATE", "MONTHLY"),
+      col("q", "Quarter(Statement Date)", "DATE", "QUARTERLY"),
+      col("y", "Year(Statement Date)", "DATE", "YEARLY"),
+      col("w", "Week(Statement Date)", "DATE", "WEEKLY"),
+      col("d", "Statement Date", "DATE", "NO_BUCKET"),
+      col("t", "Opened At", "DATE_TIME", "NO_BUCKET"),
+      col("moy", "Month of Year(Statement Date)", "DATE", "MONTH_OF_YEAR"),
+      col("b", "Average Balance", "DOUBLE", "NO_BUCKET"),
+      col("id", "Account Number", "INT64", "NO_BUCKET"),
+    ];
+    const dec2025 = 1764547200; // 1 Dec 2025 00:00 UTC
+    const data = [{ columnDataLite: [
+      { columnId: "m", dataValue: [dec2025] },
+      { columnId: "q", dataValue: [dec2025] },
+      { columnId: "y", dataValue: [dec2025] },
+      { columnId: "w", dataValue: [dec2025] },
+      { columnId: "d", dataValue: [dec2025] },
+      { columnId: "t", dataValue: [dec2025 + 14 * 3600] },
+      { columnId: "moy", dataValue: [12] },
+      { columnId: "b", dataValue: [8194.89] },
+      { columnId: "id", dataValue: [1764547201] },
+    ] }];
+    for (const t of [
+      tableFromEmbedAnswerData({ data: { embedAnswerData: { columns: typed, data } } }),
+      tableFromAnswerService({ columns: typed, data }),
+    ]) {
+      const shown = Object.fromEntries(t.columns.map((c) => [c.name, formatCell(t.rows[0][c.name], c)]));
+      assert.equal(shown["Month(Statement Date)"], "Dec 2025");
+      assert.equal(shown["Quarter(Statement Date)"], "Q4 2025");
+      assert.equal(shown["Year(Statement Date)"], "2025");
+      assert.equal(shown["Week(Statement Date)"], "Week of 01 Dec 2025");
+      assert.equal(shown["Statement Date"], "01 Dec 2025");
+      assert.equal(shown["Opened At"], "01 Dec 2025, 14:00");
+      assert.equal(shown["Month of Year(Statement Date)"], "12", "MONTH_OF_YEAR is a number, not a timestamp");
+      assert.equal(shown["Account Number"], "1,764,547,201", "an untimed INT64 stays a number");
+      const month = t.columns.find((c) => c.name === "Month(Statement Date)");
+      assert.equal(month.numeric, false);
+      assert.equal(t.rows[0]["Month(Statement Date)"], dec2025 * 1000, "stored as ms, so it sorts by time");
+    }
+  },
+  "REST data has names only: bucketed names are dates, other numbers are not"() {
+    const payload = {
+      metadata_id: "lb",
+      contents: [{
+        visualization_id: VIZ,
+        visualization_name: "Trend",
+        column_names: ["Month(Statement Date)", "Average Monthly Savings Balance", "Customer ID"],
+        data_rows: [[1764547200, 8194.89, 1764547200], [1767225600, 8260.95, 1767225600]],
+      }],
+    };
+    const t = tableFromLiveboardData(payload, VIZ);
+    const [month, balance, id] = t.columns;
+    assert.equal(month.date, true);
+    assert.equal(formatCell(t.rows[1][month.name], month), "Jan 2026");
+    assert.equal(balance.numeric, true);
+    assert.equal(id.date, false, "no bucket in the name: left as a number");
+  },
   "answerService.fetchData result ({ columns, data }) is read"() {
     const t = tableFromAnswerService({ columns, data: [{ columnDataLite: series }] });
     assert.equal(t.rows.length, 3);
