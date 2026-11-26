@@ -68,5 +68,6 @@ export function placeholderOverview(region: Region | null): OverviewData {
       { rating: "very good", customers: 18 },
       { rating: "exceptional", customers: 4 },
     ],
+    signals: [],
   };
 }

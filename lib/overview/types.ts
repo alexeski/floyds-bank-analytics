@@ -23,6 +23,21 @@ export type MonthPoint = {
   cards: number;
 };
 
+/** One signal in the Overview's Signals list: a notable movement, worked out from the figures below. */
+export type Signal = {
+  /** The spec ID it implements, SIG-01 to SIG-04 (see SIGNAL_SPECS in ./spec.ts). */
+  id: string;
+  tone: "good" | "warning" | "critical";
+  /** One line with the figure in it, e.g. "Savings balances up 10.0% in 12 months". */
+  title: string;
+  /** One sentence of context. */
+  detail: string;
+  /** The line of business it belongs to, shown on the right. */
+  area: string;
+  /** A question Scout can answer from the Banking model to explain it ("Ask Scout why"). */
+  question: string;
+};
+
 export type OverviewData = {
   /** "placeholder" shows the design spec in place of the widgets; "live" lights it up. */
   source: "placeholder" | "live";
@@ -54,4 +69,6 @@ export type OverviewData = {
   ageGroups: { group: string; customers: number; savings: number }[];
   /** Customers per credit rating, lowest rating first. */
   creditRatings: { rating: string; customers: number }[];
+  /** The Signals list, in SIG order; computed from the fields above, so no extra queries. Empty until connected. */
+  signals: Signal[];
 };

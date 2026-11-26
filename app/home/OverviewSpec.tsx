@@ -4,6 +4,8 @@ import {
   KPI_SPECS,
   LOB_ROWS,
   LOB_SPEC,
+  SIGNAL_SPECS,
+  SIGNALS_SPEC,
   type WidgetKind,
   type WidgetSpec,
 } from "@/lib/overview/spec";
@@ -261,6 +263,57 @@ function Wireframe({ kind }: { kind: WidgetKind }) {
     default:
       return null;
   }
+}
+
+/** The Signals list's spec (SIG-01 to SIG-04), shown in the Signals column until data is live. */
+export function SignalsSpec() {
+  return (
+    <SpecFrame spec={SIGNALS_SPEC} step={11}>
+      <SignalTable />
+    </SpecFrame>
+  );
+}
+
+function SignalTable() {
+  return (
+    <ul className="mt-4 divide-y divide-dashed divide-line text-xs">
+      {SIGNAL_SPECS.map((signal) => (
+        <li key={signal.id} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[4.5rem_minmax(0,1fr)]">
+          <span className="font-mono font-bold" style={{ color: INK }}>
+            {signal.id}
+          </span>
+          <div className="min-w-0 space-y-1">
+            <p className="font-semibold text-ink">
+              {signal.name} <span className="font-normal text-muted">· {signal.area}</span>
+            </p>
+            <p className="text-ink">
+              <span className="text-muted">Title </span>
+              {signal.title}
+            </p>
+            <p className="text-ink">
+              <span className="text-muted">Detail </span>
+              {signal.detail}
+            </p>
+            <p className="text-ink">
+              <span className="text-muted">Tone </span>
+              {signal.tone}
+            </p>
+            <p className="text-ink">
+              <span className="font-mono font-semibold uppercase" style={{ color: INK }}>Data </span>
+              {signal.data}
+              <span className="text-muted">
+                {" "}
+                · {signal.regionFilter ? "follows the region filter" : "ignores the region filter"}
+              </span>
+            </p>
+            <p className="text-ink">
+              <span className="text-muted">Ask Scout </span>&ldquo;{signal.question}&rdquo;
+            </p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function LobTable() {

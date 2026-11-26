@@ -5,14 +5,14 @@ import { BANK_NAME } from "../components/brand";
 import OverviewFilters from "./OverviewFilters";
 import OverviewLive from "./OverviewLive";
 import { OverviewTransitionProvider, PendingSurface } from "./OverviewTransition";
-import SignalsAndLinks from "./SignalsAndLinks";
 
 export const metadata: Metadata = {
   title: "Overview",
 };
 
 /**
- * Sync shell. The filters and the live figures read the URL's search params,
+ * Sync shell. The filters and the live figures (including Signals, which are
+ * worked out from them) read the URL's search params,
  * which are only known at request time, so each sits in its own Suspense
  * boundary; everything else renders immediately.
  */
@@ -44,7 +44,6 @@ export default function OverviewPage({ searchParams }: PageProps<"/home">) {
             <OverviewLive searchParams={searchParams} />
           </Suspense>
         </PendingSurface>
-        <SignalsAndLinks />
       </div>
     </OverviewTransitionProvider>
   );
@@ -68,6 +67,10 @@ function OverviewSkeleton() {
         {[0, 1, 2].map((i) => (
           <div key={i} className={`${block} h-[320px]`} />
         ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <div className={`${block} h-[420px]`} />
+        <div className={`${block} h-[420px]`} />
       </div>
     </div>
   );

@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PRODUCT_NAME } from "../components/brand";
 import { AlertIcon, ArrowRightIcon, ChartIcon, CheckIcon, SparkleIcon } from "../components/icons";
-import { SIGNALS, type Signal } from "../components/sampleData";
+import type { Signal } from "@/lib/overview/types";
 import AskAboutSignal from "./AskAboutSignal";
+import { SignalsSpec } from "./OverviewSpec";
 
 const SIGNAL_STYLES: Record<
   Signal["tone"],
@@ -26,55 +27,18 @@ const SIGNAL_STYLES: Record<
   },
 };
 
-/** The Signals list (fixed figures from the Banking model) and the two quick links. */
-export default function SignalsAndLinks() {
+/**
+ * The Signals list and the two quick links. `signals` comes from
+ * getOverviewData(); null means the data isn't connected yet, so the Signals
+ * column shows its design spec (SIG-01 to SIG-04) instead.
+ */
+export default function SignalsAndLinks({ signals }: { signals: readonly Signal[] | null }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-      <section className="rounded-xl border border-line bg-white">
-        <div className="flex items-center justify-between border-b border-line px-6 py-4">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">Signals</h2>
-            <p className="text-sm text-muted">
-              Notable movements in the last 12 months. Ask Scout to explain any of them.
-            </p>
-          </div>
-          <span className="rounded-full bg-surface px-2.5 py-1 text-xs font-semibold text-muted">
-            {SIGNALS.length} new
-          </span>
-        </div>
-        <ul className="divide-y divide-line">
-          {SIGNALS.map((signal) => {
-            const style = SIGNAL_STYLES[signal.tone];
-            const Icon = style.icon;
-            return (
-              <li key={signal.title} className="flex gap-4 px-6 py-4">
-                <span
-                  className={`mt-0.5 h-fit rounded-md p-1.5 ring-1 ${style.badge}`}
-                >
-                  <Icon className="size-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-ink">{signal.title}</p>
-                    <span
-                      className={`rounded px-1.5 py-0.5 text-[11px] font-bold ring-1 ${style.badge}`}
-                    >
-                      {style.label}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-sm text-muted">{signal.detail}</p>
-                  <AskAboutSignal question={signal.question} />
-                </div>
-                <span className="hidden shrink-0 text-xs font-semibold text-muted sm:block">
-                  {signal.area}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      {signals === null ? <SignalsSpec /> : <SignalList signals={signals} />}
 
-      <div className="grid gap-6">
+      {/* Beside the tall spec frame, the links keep their own height. */}
+      <div className={`grid gap-6 ${signals === null ? "self-start" : ""}`}>
         <QuickLink
           href="/analytics"
           icon={<ChartIcon className="size-5" />}
@@ -92,6 +56,55 @@ export default function SignalsAndLinks() {
         />
       </div>
     </div>
+  );
+}
+
+/** The live Signals list, worked out by getOverviewData() from the page's figures. */
+function SignalList({ signals }: { signals: readonly Signal[] }) {
+  return (
+    <section className="rounded-xl border border-line bg-white">
+      <div className="flex items-center justify-between border-b border-line px-6 py-4">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Signals</h2>
+          <p className="text-sm text-muted">
+            Notable movements in the last 12 months. Ask Scout to explain any of them.
+          </p>
+        </div>
+        <span className="rounded-full bg-surface px-2.5 py-1 text-xs font-semibold text-muted">
+          {signals.length} new
+        </span>
+      </div>
+      {signals.length === 0 ? (
+        <p className="px-6 py-8 text-sm text-muted">No signals right now.</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {signals.map((signal) => {
+            const style = SIGNAL_STYLES[signal.tone];
+            const Icon = style.icon;
+            return (
+              <li key={signal.id} className="flex gap-4 px-6 py-4">
+                <span className={`mt-0.5 h-fit rounded-md p-1.5 ring-1 ${style.badge}`}>
+                  <Icon className="size-4" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-ink">{signal.title}</p>
+                    <span className={`rounded px-1.5 py-0.5 text-[11px] font-bold ring-1 ${style.badge}`}>
+                      {style.label}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-sm text-muted">{signal.detail}</p>
+                  <AskAboutSignal question={signal.question} />
+                </div>
+                <span className="hidden shrink-0 text-xs font-semibold text-muted sm:block">
+                  {signal.area}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 

@@ -3,6 +3,7 @@ import "server-only";
 import { connection } from "next/server";
 import { restClient } from "@/lib/thoughtspot/liveboards";
 import { findModelIdByName } from "@/lib/thoughtspot/models";
+import { buildSignals } from "./signals";
 import type { MonthPoint, OverviewData, Region } from "./types";
 
 /**
@@ -89,7 +90,7 @@ export async function getOverviewData(region: Region | null): Promise<OverviewDa
     .sort((a, b) => a.month - b.month);
 
   const [t = []] = totals;
-  const data: OverviewData = {
+  const figures: Omit<OverviewData, "signals"> = {
     source: "live",
     region,
     asOf: months.at(-1)?.month ?? 0,
@@ -124,6 +125,8 @@ export async function getOverviewData(region: Region | null): Promise<OverviewDa
       customers: num(row[1]),
     })),
   };
+  // Signals are worked out from the figures above: no extra queries.
+  const data: OverviewData = { ...figures, signals: buildSignals(figures) };
 
   cache.set(key, { at: Date.now(), data });
   return data;
