@@ -69,7 +69,7 @@ export default function LoginPage() {
               Log on
             </h1>
             <p className="mt-2 text-muted">
-              Use your {BANK_NAME} colleague ID to continue.
+              Use your work email to continue.
             </p>
 
             <LoginForm />
@@ -78,8 +78,9 @@ export default function LoginPage() {
               <ShieldIcon className="mt-0.5 size-5 shrink-0 text-brand-700" />
               <p>
                 <span className="font-semibold text-ink">Demo environment.</span>{" "}
-                No real credentials are needed or checked. Please don&rsquo;t
-                enter a real password.
+                The sign-in details are filled in for you and aren&rsquo;t
+                checked, so just select Log on. Please don&rsquo;t enter a real
+                password.
               </p>
             </div>
           </div>

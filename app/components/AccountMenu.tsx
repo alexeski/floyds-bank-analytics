@@ -2,13 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { BANK_NAME } from "./brand";
+import { DEMO_USER as USER } from "./brand";
 import { LogOutIcon } from "./icons";
 
-/** The demo colleague every lab attendee is signed in as. */
-const USER = { name: "Sam Taylor", role: "Group Finance", initials: "ST" } as const;
-
-/** Avatar button with the signed-in colleague's details and Log off. */
+/** Avatar button with the signed-in user's details and Log off. */
 export default function AccountMenu() {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -54,7 +51,7 @@ export default function AccountMenu() {
         <div
           id={menuId}
           role="menu"
-          className="motion-rise absolute right-0 z-40 mt-2 w-64 overflow-hidden rounded-xl border border-line bg-white shadow-xl shadow-brand-900/10"
+          className="motion-rise absolute right-0 z-40 mt-2 w-72 overflow-hidden rounded-xl border border-line bg-white shadow-xl shadow-brand-900/10"
           style={{ ["--rise-delay" as string]: "0ms" }}
         >
           <div className="flex items-center gap-3 border-b border-line bg-surface/60 px-4 py-3.5">
@@ -63,8 +60,9 @@ export default function AccountMenu() {
             </span>
             <span className="min-w-0 leading-tight">
               <span className="block truncate font-bold text-ink">{USER.name}</span>
-              <span className="block truncate text-xs text-muted">
-                {USER.role} · {BANK_NAME}
+              <span className="block truncate text-xs text-ink/80">{USER.email}</span>
+              <span className="mt-0.5 block truncate text-xs text-muted">
+                {USER.role} · {USER.company}
               </span>
             </span>
           </div>

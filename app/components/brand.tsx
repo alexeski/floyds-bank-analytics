@@ -7,6 +7,20 @@ import type { SVGProps } from "react";
 export const BANK_NAME = "Floyds Bank";
 export const PRODUCT_NAME = "Bankalytics";
 
+/**
+ * The demo user every lab attendee is signed in as: someone at one of the
+ * bank's business clients (a made-up company). The log-on form is for show:
+ * the app reaches the analytics service with trusted-auth tokens for the lab
+ * user in .env.local, so these details are never checked.
+ */
+export const DEMO_USER = {
+  name: "Sam Taylor",
+  role: "Finance Director",
+  company: "Kestrel Foods",
+  initials: "ST",
+  email: "sam.taylor@company.co.uk",
+} as const;
+
 /** The "galloping horse" emblem: a horse's head inside a rounded square. */
 export function Emblem({
   tone = "brand",
